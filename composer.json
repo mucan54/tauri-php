@@ -28,10 +28,10 @@
     "symfony/filesystem": "^6.0|^7.0"
   },
   "require-dev": {
+    "laravel/pint": "^1.25",
+    "mockery/mockery": "^1.6",
     "orchestra/testbench": "^8.0|^9.0",
-    "phpunit/phpunit": "^10.0",
-    "laravel/pint": "^1.0",
-    "mockery/mockery": "^1.6"
+    "phpunit/phpunit": "^10.0"
   },
   "autoload": {
     "psr-4": {

@@ -23,21 +23,16 @@ class TauriPhpService
 
     /**
      * Create a new TauriPhpService instance.
-     *
-     * @param  string|null  $basePath
      */
     public function __construct(?string $basePath = null)
     {
-        $this->filesystem = new Filesystem();
+        $this->filesystem = new Filesystem;
         $this->basePath = $basePath ?? base_path();
     }
 
     /**
      * Initialize a new Tauri project.
      *
-     * @param  string  $appName
-     * @param  array  $options
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -51,8 +46,6 @@ class TauriPhpService
      * Build the Tauri application for specified platforms.
      *
      * @param  string|array  $platforms
-     * @param  array  $options
-     * @return array
      *
      * @throws TauriPhpException
      */
@@ -66,8 +59,6 @@ class TauriPhpService
     /**
      * Start the development server.
      *
-     * @param  array  $options
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -80,8 +71,6 @@ class TauriPhpService
     /**
      * Create distribution packages.
      *
-     * @param  array  $options
-     * @return array
      *
      * @throws TauriPhpException
      */
@@ -94,8 +83,6 @@ class TauriPhpService
 
     /**
      * Get the package version.
-     *
-     * @return string
      */
     public function getVersion(): string
     {
@@ -104,8 +91,6 @@ class TauriPhpService
 
     /**
      * Check if Tauri is initialized in the project.
-     *
-     * @return bool
      */
     public function isTauriInitialized(): bool
     {
@@ -118,8 +103,6 @@ class TauriPhpService
 
     /**
      * Get build information.
-     *
-     * @return array
      */
     public function getBuildInfo(): array
     {
@@ -159,8 +142,6 @@ class TauriPhpService
 
     /**
      * Clean build artifacts and temporary files.
-     *
-     * @return void
      */
     public function clean(): void
     {
@@ -171,8 +152,6 @@ class TauriPhpService
     /**
      * Prepare the Laravel application for embedding.
      *
-     * @param  bool  $optimize
-     * @return string
      *
      * @throws TauriPhpException
      */
@@ -199,10 +178,6 @@ class TauriPhpService
 
     /**
      * Copy Laravel application to destination.
-     *
-     * @param  string  $source
-     * @param  string  $destination
-     * @return void
      */
     protected function copyLaravelApp(string $source, string $destination): void
     {
@@ -269,14 +244,12 @@ class TauriPhpService
     /**
      * Create embedded .env file.
      *
-     * @param  string  $appDir
-     * @return void
      *
      * @throws TauriPhpException
      */
     protected function createEmbeddedEnv(string $appDir): void
     {
-        $stubManager = new StubManager();
+        $stubManager = new StubManager;
 
         $appKey = $this->getAppKey();
 
@@ -290,8 +263,6 @@ class TauriPhpService
 
     /**
      * Get or generate application key.
-     *
-     * @return string
      */
     protected function getAppKey(): string
     {

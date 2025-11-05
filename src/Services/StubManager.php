@@ -26,16 +26,13 @@ class StubManager
      */
     public function __construct()
     {
-        $this->filesystem = new Filesystem();
+        $this->filesystem = new Filesystem;
         $this->stubsPath = __DIR__.'/../../stubs';
     }
 
     /**
      * Get the content of a stub file with replacements.
      *
-     * @param  string  $stub
-     * @param  array  $replacements
-     * @return string
      *
      * @throws TauriPhpException
      */
@@ -43,7 +40,7 @@ class StubManager
     {
         $path = $this->getStubPath($stub);
 
-        if (!$this->exists($stub)) {
+        if (! $this->exists($stub)) {
             throw TauriPhpException::fileOperationFailed('read', $path, 'Stub file does not exist');
         }
 
@@ -55,10 +52,6 @@ class StubManager
     /**
      * Copy a stub file to a destination with replacements.
      *
-     * @param  string  $stub
-     * @param  string  $destination
-     * @param  array  $replacements
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -68,7 +61,7 @@ class StubManager
 
         $destinationDir = dirname($destination);
 
-        if (!is_dir($destinationDir)) {
+        if (! is_dir($destinationDir)) {
             $this->filesystem->mkdir($destinationDir, 0755);
         }
 
@@ -80,10 +73,6 @@ class StubManager
     /**
      * Copy an entire directory recursively with replacements.
      *
-     * @param  string  $stubDir
-     * @param  string  $destination
-     * @param  array  $replacements
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -91,11 +80,11 @@ class StubManager
     {
         $sourcePath = $this->getStubPath($stubDir);
 
-        if (!is_dir($sourcePath)) {
+        if (! is_dir($sourcePath)) {
             throw TauriPhpException::fileOperationFailed('read', $sourcePath, 'Directory does not exist');
         }
 
-        if (!is_dir($destination)) {
+        if (! is_dir($destination)) {
             $this->filesystem->mkdir($destination, 0755);
         }
 
@@ -123,9 +112,6 @@ class StubManager
 
     /**
      * Check if a stub exists.
-     *
-     * @param  string  $stub
-     * @return bool
      */
     public function exists(string $stub): bool
     {
@@ -134,10 +120,6 @@ class StubManager
 
     /**
      * Replace variables in content.
-     *
-     * @param  string  $content
-     * @param  array  $replacements
-     * @return string
      */
     protected function replaceVariables(string $content, array $replacements): string
     {
@@ -150,9 +132,6 @@ class StubManager
 
     /**
      * Get the full path to a stub.
-     *
-     * @param  string  $stub
-     * @return string
      */
     protected function getStubPath(string $stub): string
     {
@@ -164,8 +143,6 @@ class StubManager
 
     /**
      * Get the stubs directory path.
-     *
-     * @return string
      */
     public function getStubsPath(): string
     {

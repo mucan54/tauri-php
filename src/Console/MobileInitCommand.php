@@ -31,8 +31,6 @@ class MobileInitCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -41,7 +39,7 @@ class MobileInitCommand extends Command
             $this->newLine();
 
             // Validate that Tauri is already initialized
-            if (!$this->isTauriInitialized()) {
+            if (! $this->isTauriInitialized()) {
                 throw TauriPhpException::configurationError('Run tauri:init first to initialize the desktop project');
             }
 
@@ -86,8 +84,6 @@ class MobileInitCommand extends Command
     /**
      * Validate prerequisites for mobile development.
      *
-     * @param  string  $platform
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -109,14 +105,13 @@ class MobileInitCommand extends Command
     /**
      * Validate Android prerequisites.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
     protected function validateAndroidPrerequisites(): void
     {
         // Check for Java/JDK
-        if (!$this->commandExists('java')) {
+        if (! $this->commandExists('java')) {
             throw TauriPhpException::prerequisiteMissing(
                 'Java JDK',
                 'Install Java JDK 11 or higher from https://adoptium.net/'
@@ -129,7 +124,7 @@ class MobileInitCommand extends Command
         // Check for Android SDK
         $androidHome = getenv('ANDROID_HOME') ?: getenv('ANDROID_SDK_ROOT');
 
-        if (!$androidHome || !is_dir($androidHome)) {
+        if (! $androidHome || ! is_dir($androidHome)) {
             $this->warn('  ⚠ ANDROID_HOME not set. Please install Android SDK and set ANDROID_HOME environment variable.');
             $this->line('    Download from: https://developer.android.com/studio');
         } else {
@@ -147,7 +142,6 @@ class MobileInitCommand extends Command
     /**
      * Validate iOS prerequisites.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -162,7 +156,7 @@ class MobileInitCommand extends Command
         }
 
         // Check for Xcode
-        if (!$this->commandExists('xcodebuild')) {
+        if (! $this->commandExists('xcodebuild')) {
             throw TauriPhpException::prerequisiteMissing(
                 'Xcode',
                 'Install Xcode from the Mac App Store'
@@ -173,7 +167,7 @@ class MobileInitCommand extends Command
         $this->line("  ✓ Xcode: {$xcodeVersion}");
 
         // Check for CocoaPods
-        if (!$this->commandExists('pod')) {
+        if (! $this->commandExists('pod')) {
             $this->warn('  ⚠ CocoaPods not found. Install with: sudo gem install cocoapods');
         } else {
             $podVersion = $this->getCommandVersion('pod', '--version');
@@ -184,7 +178,6 @@ class MobileInitCommand extends Command
     /**
      * Initialize Android platform.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -205,7 +198,6 @@ class MobileInitCommand extends Command
     /**
      * Initialize iOS platform.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -215,7 +207,7 @@ class MobileInitCommand extends Command
 
         $teamId = $this->option('team-id');
 
-        if (!$teamId) {
+        if (! $teamId) {
             throw TauriPhpException::configurationError('iOS requires --team-id option. Get your Team ID from https://developer.apple.com/account');
         }
 
@@ -231,8 +223,6 @@ class MobileInitCommand extends Command
 
     /**
      * Initialize both platforms.
-     *
-     * @return void
      */
     protected function initializeBoth(): void
     {
@@ -243,8 +233,6 @@ class MobileInitCommand extends Command
     /**
      * Update .env.tauri with mobile settings.
      *
-     * @param  string  $platform
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -252,10 +240,10 @@ class MobileInitCommand extends Command
     {
         $this->line('📝 Updating .env.tauri...');
 
-        $envManager = new EnvTauriManager();
+        $envManager = new EnvTauriManager;
         $packageName = $this->option('package-name');
 
-        if (!$packageName) {
+        if (! $packageName) {
             $appIdentifier = $envManager->get('TAURI_APP_IDENTIFIER', 'com.example.myapp');
             $packageName = $appIdentifier;
         }
@@ -278,8 +266,6 @@ class MobileInitCommand extends Command
 
     /**
      * Check if Tauri is initialized.
-     *
-     * @return bool
      */
     protected function isTauriInitialized(): bool
     {
@@ -288,9 +274,6 @@ class MobileInitCommand extends Command
 
     /**
      * Display next steps.
-     *
-     * @param  string  $platform
-     * @return void
      */
     protected function displayNextSteps(string $platform): void
     {

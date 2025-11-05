@@ -3,8 +3,8 @@
 namespace Mucan54\TauriPhp\Services;
 
 use Mucan54\TauriPhp\Exceptions\TauriPhpException;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Process;
 
 class CodeObfuscator
 {
@@ -38,13 +38,10 @@ class CodeObfuscator
 
     /**
      * Create a new CodeObfuscator instance.
-     *
-     * @param  string|null  $basePath
-     * @param  string  $tool
      */
     public function __construct(?string $basePath = null, string $tool = 'yakpro-po')
     {
-        $this->filesystem = new Filesystem();
+        $this->filesystem = new Filesystem;
         $this->basePath = $basePath ?? base_path();
         $this->tool = $tool;
         $this->excludePaths = config('tauri-php.obfuscation.exclude_paths', [
@@ -57,7 +54,6 @@ class CodeObfuscator
     /**
      * Obfuscate PHP code in the embedded app directory.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -65,7 +61,7 @@ class CodeObfuscator
     {
         $appDir = $this->basePath.'/tauri-temp/app-embedded';
 
-        if (!is_dir($appDir)) {
+        if (! is_dir($appDir)) {
             throw TauriPhpException::fileOperationFailed('read', $appDir, 'Directory does not exist');
         }
 
@@ -82,8 +78,6 @@ class CodeObfuscator
     /**
      * Obfuscate code using YakPro-Po.
      *
-     * @param  string  $appDir
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -93,7 +87,7 @@ class CodeObfuscator
         $yakProPoDir = $tempDir.'/yakpro-po';
 
         // Clone YakPro-Po if not already present
-        if (!is_dir($yakProPoDir)) {
+        if (! is_dir($yakProPoDir)) {
             $process = new Process([
                 'git',
                 'clone',
@@ -105,7 +99,7 @@ class CodeObfuscator
             $process->setTimeout(300);
             $process->run();
 
-            if (!$process->isSuccessful()) {
+            if (! $process->isSuccessful()) {
                 throw TauriPhpException::buildFailed('obfuscation', 'Failed to clone YakPro-Po repository');
             }
         }
@@ -129,7 +123,7 @@ class CodeObfuscator
         $process->setTimeout(600);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             throw TauriPhpException::buildFailed('obfuscation', 'YakPro-Po obfuscation failed: '.$process->getErrorOutput());
         }
 
@@ -141,10 +135,6 @@ class CodeObfuscator
     /**
      * Generate YakPro-Po configuration file.
      *
-     * @param  string  $configPath
-     * @param  string  $sourceDir
-     * @param  string  $targetDir
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -195,9 +185,6 @@ PHP;
 
     /**
      * Set paths to exclude from obfuscation.
-     *
-     * @param  array  $paths
-     * @return void
      */
     public function setExcludePaths(array $paths): void
     {
@@ -206,8 +193,6 @@ PHP;
 
     /**
      * Get the obfuscation tool.
-     *
-     * @return string
      */
     public function getTool(): string
     {
@@ -216,9 +201,6 @@ PHP;
 
     /**
      * Set the obfuscation tool.
-     *
-     * @param  string  $tool
-     * @return void
      */
     public function setTool(string $tool): void
     {

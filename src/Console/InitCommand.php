@@ -35,8 +35,6 @@ class InitCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -48,7 +46,7 @@ class InitCommand extends Command
             $this->validatePrerequisites();
 
             // Step 2: Check if already initialized
-            if ($this->isTauriInitialized() && !$this->option('force')) {
+            if ($this->isTauriInitialized() && ! $this->option('force')) {
                 $this->warn('Tauri is already initialized. Use --force to reinitialize.');
 
                 return Command::FAILURE;
@@ -103,7 +101,6 @@ class InitCommand extends Command
     /**
      * Validate prerequisites.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -118,7 +115,7 @@ class InitCommand extends Command
         ];
 
         foreach ($prerequisites as $command => $name) {
-            if (!$this->commandExists($command)) {
+            if (! $this->commandExists($command)) {
                 throw TauriPhpException::prerequisiteMissing($name, "Please install {$name}");
             }
 
@@ -132,7 +129,6 @@ class InitCommand extends Command
     /**
      * Create .env.tauri configuration file.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -141,7 +137,7 @@ class InitCommand extends Command
         $this->line('📝 Creating .env.tauri configuration...');
 
         $appName = config('app.name', 'My Desktop App');
-        $envManager = new EnvTauriManager();
+        $envManager = new EnvTauriManager;
 
         $options = [
             'identifier' => $this->option('identifier') ?: $this->generateIdentifier($appName),
@@ -157,8 +153,6 @@ class InitCommand extends Command
 
     /**
      * Create necessary directories.
-     *
-     * @return void
      */
     protected function createDirectoryStructure(): void
     {
@@ -175,7 +169,7 @@ class InitCommand extends Command
         foreach ($directories as $dir) {
             $path = base_path($dir);
 
-            if (!is_dir($path)) {
+            if (! is_dir($path)) {
                 mkdir($path, 0755, true);
                 $this->line("  ✓ Created {$dir}");
             }
@@ -187,7 +181,6 @@ class InitCommand extends Command
     /**
      * Install Node.js dependencies.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -198,8 +191,8 @@ class InitCommand extends Command
         // Create package.json if it doesn't exist
         $packageJsonPath = base_path('package.json');
 
-        if (!file_exists($packageJsonPath)) {
-            $stubManager = new StubManager();
+        if (! file_exists($packageJsonPath)) {
+            $stubManager = new StubManager;
             $stubManager->copy('package.json', $packageJsonPath);
         }
 
@@ -214,7 +207,6 @@ class InitCommand extends Command
     /**
      * Initialize Tauri CLI.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -231,7 +223,6 @@ class InitCommand extends Command
     /**
      * Setup Rust backend from stubs.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -239,8 +230,8 @@ class InitCommand extends Command
     {
         $this->line('🦀 Setting up Rust backend...');
 
-        $stubManager = new StubManager();
-        $envManager = new EnvTauriManager();
+        $stubManager = new StubManager;
+        $envManager = new EnvTauriManager;
         $env = $envManager->all();
 
         $appName = $env['TAURI_APP_NAME'] ?? 'My Desktop App';
@@ -264,7 +255,6 @@ class InitCommand extends Command
     /**
      * Setup frontend files.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -273,8 +263,8 @@ class InitCommand extends Command
         $this->line('🎨 Setting up frontend...');
 
         $template = $this->option('template');
-        $stubManager = new StubManager();
-        $envManager = new EnvTauriManager();
+        $stubManager = new StubManager;
+        $envManager = new EnvTauriManager;
         $env = $envManager->all();
 
         $replacements = [
@@ -293,7 +283,6 @@ class InitCommand extends Command
     /**
      * Create build scripts.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -301,7 +290,7 @@ class InitCommand extends Command
     {
         $this->line('📜 Creating build scripts...');
 
-        $stubManager = new StubManager();
+        $stubManager = new StubManager;
 
         $stubManager->copy('scripts/build.sh', base_path('build.sh'));
         $stubManager->copy('scripts/docker-build.sh', base_path('docker-build.sh'));
@@ -317,7 +306,6 @@ class InitCommand extends Command
     /**
      * Generate Tauri configuration.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -325,7 +313,7 @@ class InitCommand extends Command
     {
         $this->line('⚙️  Generating Tauri configuration...');
 
-        $envManager = new EnvTauriManager();
+        $envManager = new EnvTauriManager;
         $configGenerator = new TauriConfigGenerator($envManager);
 
         $config = $configGenerator->generate();
@@ -337,8 +325,6 @@ class InitCommand extends Command
 
     /**
      * Check if Tauri is already initialized.
-     *
-     * @return bool
      */
     protected function isTauriInitialized(): bool
     {
@@ -347,9 +333,6 @@ class InitCommand extends Command
 
     /**
      * Generate application identifier.
-     *
-     * @param  string  $appName
-     * @return string
      */
     protected function generateIdentifier(string $appName): string
     {
@@ -360,8 +343,6 @@ class InitCommand extends Command
 
     /**
      * Display next steps.
-     *
-     * @return void
      */
     protected function displayNextSteps(): void
     {

@@ -3,21 +3,19 @@
 namespace Mucan54\TauriPhp;
 
 use Illuminate\Support\ServiceProvider;
-use Mucan54\TauriPhp\Console\InitCommand;
 use Mucan54\TauriPhp\Console\BuildCommand;
-use Mucan54\TauriPhp\Console\DevCommand;
-use Mucan54\TauriPhp\Console\PackageCommand;
 use Mucan54\TauriPhp\Console\CleanCommand;
-use Mucan54\TauriPhp\Console\MobileInitCommand;
+use Mucan54\TauriPhp\Console\DevCommand;
+use Mucan54\TauriPhp\Console\InitCommand;
 use Mucan54\TauriPhp\Console\MobileDevCommand;
+use Mucan54\TauriPhp\Console\MobileInitCommand;
+use Mucan54\TauriPhp\Console\PackageCommand;
 use Mucan54\TauriPhp\Services\TauriPhpService;
 
 class TauriPhpServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -29,14 +27,12 @@ class TauriPhpServiceProvider extends ServiceProvider
 
         // Register the main service as a singleton
         $this->app->singleton('tauri-php', function ($app) {
-            return new TauriPhpService();
+            return new TauriPhpService;
         });
     }
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -66,8 +62,6 @@ class TauriPhpServiceProvider extends ServiceProvider
 
     /**
      * Get the services provided by the provider.
-     *
-     * @return array
      */
     public function provides(): array
     {

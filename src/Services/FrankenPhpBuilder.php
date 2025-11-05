@@ -3,8 +3,8 @@
 namespace Mucan54\TauriPhp\Services;
 
 use Mucan54\TauriPhp\Exceptions\TauriPhpException;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Process;
 
 class FrankenPhpBuilder
 {
@@ -31,13 +31,10 @@ class FrankenPhpBuilder
 
     /**
      * Create a new FrankenPhpBuilder instance.
-     *
-     * @param  EnvTauriManager  $envManager
-     * @param  string|null  $basePath
      */
     public function __construct(EnvTauriManager $envManager, ?string $basePath = null)
     {
-        $this->filesystem = new Filesystem();
+        $this->filesystem = new Filesystem;
         $this->basePath = $basePath ?? base_path();
         $this->envManager = $envManager;
     }
@@ -45,10 +42,6 @@ class FrankenPhpBuilder
     /**
      * Build FrankenPHP binary for a specific platform.
      *
-     * @param  string  $platform
-     * @param  string  $targetTriple
-     * @param  array  $options
-     * @return string
      *
      * @throws TauriPhpException
      */
@@ -62,7 +55,7 @@ class FrankenPhpBuilder
 
         $binariesDir = $this->basePath.'/binaries';
 
-        if (!is_dir($binariesDir)) {
+        if (! is_dir($binariesDir)) {
             $this->filesystem->mkdir($binariesDir, 0755);
         }
 
@@ -70,7 +63,7 @@ class FrankenPhpBuilder
         $binaryPath = $binariesDir.'/'.$binaryName;
 
         // Check if binary already exists
-        if (file_exists($binaryPath) && !($options['force'] ?? false)) {
+        if (file_exists($binaryPath) && ! ($options['force'] ?? false)) {
             return $binaryPath;
         }
 
@@ -85,14 +78,6 @@ class FrankenPhpBuilder
     /**
      * Build FrankenPHP natively on the current platform.
      *
-     * @param  string  $platform
-     * @param  string  $targetTriple
-     * @param  string  $phpVersion
-     * @param  string  $phpExtensions
-     * @param  string  $frankenphpVersion
-     * @param  string  $binaryPath
-     * @param  array  $options
-     * @return string
      *
      * @throws TauriPhpException
      */
@@ -109,7 +94,7 @@ class FrankenPhpBuilder
         $frankenphpDir = $tempDir.'/frankenphp';
 
         // Clone FrankenPHP repository if needed
-        if (!is_dir($frankenphpDir)) {
+        if (! is_dir($frankenphpDir)) {
             $this->filesystem->mkdir($tempDir, 0755);
 
             $process = new Process([
@@ -124,7 +109,7 @@ class FrankenPhpBuilder
             $process->setTimeout(600);
             $process->run();
 
-            if (!$process->isSuccessful()) {
+            if (! $process->isSuccessful()) {
                 throw TauriPhpException::buildFailed($platform, 'Failed to clone FrankenPHP repository');
             }
         }
@@ -133,7 +118,7 @@ class FrankenPhpBuilder
         $appSourceDir = $this->basePath.'/tauri-temp/app-embedded';
         $appDestDir = $frankenphpDir.'/dist/app';
 
-        if (!is_dir($appSourceDir)) {
+        if (! is_dir($appSourceDir)) {
             throw TauriPhpException::buildFailed($platform, 'Embedded app directory not found');
         }
 
@@ -143,7 +128,7 @@ class FrankenPhpBuilder
         // Run build-static.sh
         $buildScript = $frankenphpDir.'/build-static.sh';
 
-        if (!file_exists($buildScript)) {
+        if (! file_exists($buildScript)) {
             throw TauriPhpException::buildFailed($platform, 'build-static.sh not found');
         }
 
@@ -162,14 +147,14 @@ class FrankenPhpBuilder
             }
         });
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             throw TauriPhpException::buildFailed($platform, 'FrankenPHP build failed: '.$process->getErrorOutput());
         }
 
         // Find and copy the built binary
         $builtBinary = $frankenphpDir.'/dist/frankenphp-linux-x86_64';
 
-        if (!file_exists($builtBinary)) {
+        if (! file_exists($builtBinary)) {
             throw TauriPhpException::buildFailed($platform, 'Built binary not found');
         }
 
@@ -182,14 +167,6 @@ class FrankenPhpBuilder
     /**
      * Build FrankenPHP using Docker for cross-compilation.
      *
-     * @param  string  $platform
-     * @param  string  $targetTriple
-     * @param  string  $phpVersion
-     * @param  string  $phpExtensions
-     * @param  string  $frankenphpVersion
-     * @param  string  $binaryPath
-     * @param  array  $options
-     * @return string
      *
      * @throws TauriPhpException
      */
@@ -206,7 +183,7 @@ class FrankenPhpBuilder
         $process = new Process(['docker', '--version']);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             throw TauriPhpException::prerequisiteMissing('Docker', 'Install Docker from https://www.docker.com/');
         }
 
@@ -248,11 +225,11 @@ class FrankenPhpBuilder
             }
         });
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             throw TauriPhpException::buildFailed($platform, 'Docker build failed: '.$process->getErrorOutput());
         }
 
-        if (!file_exists($binaryPath)) {
+        if (! file_exists($binaryPath)) {
             throw TauriPhpException::buildFailed($platform, 'Built binary not found after Docker build');
         }
 
@@ -263,13 +240,10 @@ class FrankenPhpBuilder
 
     /**
      * Verify that a binary is valid.
-     *
-     * @param  string  $binaryPath
-     * @return bool
      */
     public function verifyBinary(string $binaryPath): bool
     {
-        if (!file_exists($binaryPath)) {
+        if (! file_exists($binaryPath)) {
             return false;
         }
 
@@ -281,7 +255,7 @@ class FrankenPhpBuilder
         }
 
         // Check if file is executable
-        if (!is_executable($binaryPath)) {
+        if (! is_executable($binaryPath)) {
             return false;
         }
 
@@ -290,9 +264,6 @@ class FrankenPhpBuilder
 
     /**
      * Get the binary name for a target triple.
-     *
-     * @param  string  $targetTriple
-     * @return string
      */
     protected function getBinaryName(string $targetTriple): string
     {
@@ -307,9 +278,6 @@ class FrankenPhpBuilder
 
     /**
      * Check if we're building for the current platform.
-     *
-     * @param  string  $platform
-     * @return bool
      */
     protected function isCurrentPlatform(string $platform): bool
     {

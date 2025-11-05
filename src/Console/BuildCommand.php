@@ -39,8 +39,6 @@ class BuildCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -56,9 +54,9 @@ class BuildCommand extends Command
             $this->newLine();
 
             // Step 1: Load configuration
-            $envManager = new EnvTauriManager();
+            $envManager = new EnvTauriManager;
 
-            if (!$envManager->exists()) {
+            if (! $envManager->exists()) {
                 throw TauriPhpException::configurationError('Run tauri:init first to initialize the project');
             }
 
@@ -71,7 +69,7 @@ class BuildCommand extends Command
             $this->newLine();
 
             // Step 3: Install dependencies
-            if (!$this->option('skip-deps')) {
+            if (! $this->option('skip-deps')) {
                 $this->installDependencies();
             }
 
@@ -119,8 +117,6 @@ class BuildCommand extends Command
 
     /**
      * Resolve target platforms.
-     *
-     * @return array
      */
     protected function resolvePlatforms(): array
     {
@@ -138,7 +134,7 @@ class BuildCommand extends Command
             return $allPlatforms;
         }
 
-        if (!isset($allPlatforms[$requestedPlatform])) {
+        if (! isset($allPlatforms[$requestedPlatform])) {
             $this->warn("Unknown platform: {$requestedPlatform}. Building for all platforms.");
 
             return $allPlatforms;
@@ -150,7 +146,6 @@ class BuildCommand extends Command
     /**
      * Install dependencies.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -174,7 +169,6 @@ class BuildCommand extends Command
     /**
      * Optimize Laravel application.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -198,7 +192,6 @@ class BuildCommand extends Command
     /**
      * Prepare embedded application.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -206,7 +199,7 @@ class BuildCommand extends Command
     {
         $this->line('📦 Preparing embedded application...');
 
-        $service = new TauriPhpService();
+        $service = new TauriPhpService;
         $service->prepareEmbeddedApp();
 
         $this->line('  ✓ Laravel app prepared for embedding');
@@ -216,7 +209,6 @@ class BuildCommand extends Command
     /**
      * Obfuscate PHP code.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -224,7 +216,7 @@ class BuildCommand extends Command
     {
         $this->line('🔒 Obfuscating PHP code...');
 
-        $obfuscator = new CodeObfuscator();
+        $obfuscator = new CodeObfuscator;
         $obfuscator->obfuscate();
 
         $this->line('  ✓ Code obfuscated successfully');
@@ -234,9 +226,6 @@ class BuildCommand extends Command
     /**
      * Build FrankenPHP binaries for all platforms.
      *
-     * @param  array  $platforms
-     * @param  EnvTauriManager  $envManager
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -277,8 +266,6 @@ class BuildCommand extends Command
     /**
      * Update Tauri configuration for production.
      *
-     * @param  EnvTauriManager  $envManager
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -296,7 +283,6 @@ class BuildCommand extends Command
     /**
      * Build Tauri application.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -322,8 +308,6 @@ class BuildCommand extends Command
 
     /**
      * Display build results.
-     *
-     * @return void
      */
     protected function displayBuildResults(): void
     {
@@ -331,7 +315,7 @@ class BuildCommand extends Command
 
         $bundleDir = base_path('src-tauri/target/release/bundle');
 
-        if (!is_dir($bundleDir)) {
+        if (! is_dir($bundleDir)) {
             $this->warn('  No build artifacts found');
 
             return;
@@ -356,9 +340,6 @@ class BuildCommand extends Command
 
     /**
      * Find build artifacts recursively.
-     *
-     * @param  string  $directory
-     * @return array
      */
     protected function findArtifacts(string $directory): array
     {
@@ -384,9 +365,6 @@ class BuildCommand extends Command
 
     /**
      * Format file size.
-     *
-     * @param  int  $bytes
-     * @return string
      */
     protected function formatFileSize(int $bytes): string
     {
@@ -404,8 +382,6 @@ class BuildCommand extends Command
     /**
      * Handle mobile platform build.
      *
-     * @param  string  $platform
-     * @return int
      *
      * @throws TauriPhpException
      */
@@ -415,23 +391,23 @@ class BuildCommand extends Command
         $this->newLine();
 
         // Validate mobile is initialized
-        if (!$this->isMobileInitialized($platform)) {
+        if (! $this->isMobileInitialized($platform)) {
             throw TauriPhpException::configurationError(
                 "Mobile platform not initialized. Run: php artisan tauri:mobile-init {$platform}"
             );
         }
 
         // Load configuration
-        $envManager = new EnvTauriManager();
+        $envManager = new EnvTauriManager;
 
-        if (!$envManager->exists()) {
+        if (! $envManager->exists()) {
             throw TauriPhpException::configurationError('Run tauri:init first to initialize the project');
         }
 
         $envManager->load();
 
         // Install dependencies
-        if (!$this->option('skip-deps')) {
+        if (! $this->option('skip-deps')) {
             $this->installDependencies();
         }
 
@@ -459,9 +435,6 @@ class BuildCommand extends Command
 
     /**
      * Check if mobile platform is initialized.
-     *
-     * @param  string  $platform
-     * @return bool
      */
     protected function isMobileInitialized(string $platform): bool
     {
@@ -476,8 +449,6 @@ class BuildCommand extends Command
     /**
      * Build mobile application.
      *
-     * @param  string  $platform
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -513,9 +484,6 @@ class BuildCommand extends Command
 
     /**
      * Display mobile build results.
-     *
-     * @param  string  $platform
-     * @return void
      */
     protected function displayMobileBuildResults(string $platform): void
     {

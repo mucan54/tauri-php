@@ -46,8 +46,6 @@ class DevCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -56,9 +54,9 @@ class DevCommand extends Command
             $this->newLine();
 
             // Step 1: Load configuration
-            $envManager = new EnvTauriManager();
+            $envManager = new EnvTauriManager;
 
-            if (!$envManager->exists()) {
+            if (! $envManager->exists()) {
                 throw TauriPhpException::configurationError('Run tauri:init first to initialize the project');
             }
 
@@ -104,10 +102,6 @@ class DevCommand extends Command
     /**
      * Update Tauri configuration for development.
      *
-     * @param  EnvTauriManager  $envManager
-     * @param  string  $host
-     * @param  int  $port
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -124,10 +118,6 @@ class DevCommand extends Command
 
     /**
      * Start Laravel development server.
-     *
-     * @param  string  $host
-     * @param  int  $port
-     * @return void
      */
     protected function startLaravelServer(string $host, int $port): void
     {
@@ -148,9 +138,6 @@ class DevCommand extends Command
     /**
      * Wait for server to be ready.
      *
-     * @param  string  $host
-     * @param  int  $port
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -160,7 +147,7 @@ class DevCommand extends Command
 
         $url = "http://{$host}:{$port}";
 
-        if (!$this->waitForUrl($url, 30, 1)) {
+        if (! $this->waitForUrl($url, 30, 1)) {
             throw TauriPhpException::processExecutionFailed(
                 'Laravel server',
                 'Server did not become ready in time'
@@ -173,8 +160,6 @@ class DevCommand extends Command
 
     /**
      * Start Tauri in development mode.
-     *
-     * @return void
      */
     protected function startTauriDev(): void
     {
@@ -191,8 +176,6 @@ class DevCommand extends Command
 
     /**
      * Cleanup processes.
-     *
-     * @return void
      */
     protected function cleanup(): void
     {

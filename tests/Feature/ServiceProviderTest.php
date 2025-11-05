@@ -3,7 +3,6 @@
 namespace Mucan54\TauriPhp\Tests\Feature;
 
 use Mucan54\TauriPhp\Tests\TestCase;
-use Mucan54\TauriPhp\Facades\TauriPhp;
 
 class ServiceProviderTest extends TestCase
 {
