@@ -1,0 +1,21 @@
+{
+  "identifier": "default",
+  "description": "Default permissions for Tauri-PHP application",
+  "platforms": ["linux", "macOS", "windows"],
+  "permissions": [
+    "core:default",
+    "shell:allow-execute",
+    "shell:allow-open",
+    "shell:allow-spawn",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "binaries/frankenphp",
+          "sidecar": true,
+          "args": true
+        }
+      ]
+    }
+  ]
+}

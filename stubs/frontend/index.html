@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{APP_NAME}}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow: hidden;
+        }
+
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #loading h2 {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        #loading p {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        #app-frame {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            display: none;
+        }
+
+        #error {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f8f9fa;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        #error h2 {
+            color: #dc3545;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        #error p {
+            color: #6c757d;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        #error button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #error button:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div class="spinner"></div>
+        <h2>{{APP_NAME}}</h2>
+        <p>Starting application...</p>
+    </div>
+
+    <div id="error">
+        <h2>Unable to Connect</h2>
+        <p>The application server could not be started. Please check your installation.</p>
+        <button onclick="location.reload()">Retry</button>
+    </div>
+
+    <iframe id="app-frame" src="http://{{DEV_HOST}}:{{DEV_PORT}}"></iframe>
+
+    <script>
+        const SERVER_URL = 'http://{{DEV_HOST}}:{{DEV_PORT}}';
+        const MAX_RETRIES = 30;
+        let retryCount = 0;
+
+        async function checkServer() {
+            try {
+                const response = await fetch(SERVER_URL, {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+
+                // If we get here, server is likely running
+                loadApp();
+            } catch (error) {
+                retryCount++;
+
+                if (retryCount >= MAX_RETRIES) {
+                    showError();
+                } else {
+                    setTimeout(checkServer, 1000);
+                }
+            }
+        }
+
+        function loadApp() {
+            const loading = document.getElementById('loading');
+            const frame = document.getElementById('app-frame');
+
+            frame.style.display = 'block';
+
+            frame.onload = () => {
+                loading.style.display = 'none';
+            };
+
+            // Fallback: hide loading screen after 2 seconds even if onload doesn't fire
+            setTimeout(() => {
+                loading.style.display = 'none';
+            }, 2000);
+        }
+
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'flex';
+        }
+
+        // Start checking server
+        setTimeout(checkServer, 1000);
+    </script>
+</body>
+</html>
