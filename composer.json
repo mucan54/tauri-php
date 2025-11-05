@@ -1,5 +1,6 @@
 {
   "name": "mucan54/tauri-php",
+  "version": "1.1.0",
   "description": "Build cross-platform desktop applications with Laravel and Tauri. Embed your Laravel app into native desktop apps for Windows, macOS, and Linux using FrankenPHP.",
   "keywords": [
     "laravel",
@@ -58,8 +59,11 @@
     "format": "vendor/bin/pint"
   },
   "config": {
-    "sort-packages": true
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
   },
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "prefer-stable": true
 }
