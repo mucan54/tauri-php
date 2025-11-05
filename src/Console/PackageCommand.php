@@ -31,8 +31,6 @@ class PackageCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -41,7 +39,7 @@ class PackageCommand extends Command
             $this->newLine();
 
             // Step 1: Verify build exists
-            if (!$this->verifyBuild()) {
+            if (! $this->verifyBuild()) {
                 throw TauriPhpException::buildFailed('packaging', 'No build found. Run tauri:build first.');
             }
 
@@ -75,20 +73,16 @@ class PackageCommand extends Command
 
     /**
      * Verify that a build exists.
-     *
-     * @return bool
      */
     protected function verifyBuild(): bool
     {
         $bundleDir = base_path('src-tauri/target/release/bundle');
 
-        return is_dir($bundleDir) && !empty(glob($bundleDir.'/*'));
+        return is_dir($bundleDir) && ! empty(glob($bundleDir.'/*'));
     }
 
     /**
      * Resolve package formats.
-     *
-     * @return array
      */
     protected function resolveFormats(): array
     {
@@ -99,7 +93,7 @@ class PackageCommand extends Command
             return $allFormats;
         }
 
-        if (!in_array($requestedFormat, $allFormats)) {
+        if (! in_array($requestedFormat, $allFormats)) {
             $this->warn("Unknown format: {$requestedFormat}. Using all formats.");
 
             return $allFormats;
@@ -111,8 +105,6 @@ class PackageCommand extends Command
     /**
      * Copy packages to output directory.
      *
-     * @param  array  $formats
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -123,9 +115,9 @@ class PackageCommand extends Command
         $bundleDir = base_path('src-tauri/target/release/bundle');
         $outputDir = $this->option('output') ?: base_path('tauri-builds');
 
-        $filesystem = new Filesystem();
+        $filesystem = new Filesystem;
 
-        if (!is_dir($outputDir)) {
+        if (! is_dir($outputDir)) {
             $filesystem->mkdir($outputDir, 0755);
         }
 
@@ -134,7 +126,7 @@ class PackageCommand extends Command
         foreach ($formats as $format) {
             $formatDir = $bundleDir.'/'.$format;
 
-            if (!is_dir($formatDir)) {
+            if (! is_dir($formatDir)) {
                 continue;
             }
 

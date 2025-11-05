@@ -2,8 +2,8 @@
 
 namespace Mucan54\TauriPhp\Tests\Unit;
 
-use Mucan54\TauriPhp\Tests\TestCase;
 use Mucan54\TauriPhp\Services\StubManager;
+use Mucan54\TauriPhp\Tests\TestCase;
 
 class StubManagerTest extends TestCase
 {
@@ -12,7 +12,7 @@ class StubManagerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->stubManager = new StubManager();
+        $this->stubManager = new StubManager;
     }
 
     /** @test */

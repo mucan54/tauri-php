@@ -22,9 +22,6 @@ class TauriConfigGenerator
 
     /**
      * Create a new TauriConfigGenerator instance.
-     *
-     * @param  EnvTauriManager  $envManager
-     * @param  string|null  $basePath
      */
     public function __construct(EnvTauriManager $envManager, ?string $basePath = null)
     {
@@ -36,8 +33,6 @@ class TauriConfigGenerator
     /**
      * Generate tauri.conf.json from .env.tauri.
      *
-     * @param  array  $overrides
-     * @return array
      *
      * @throws TauriPhpException
      */
@@ -104,9 +99,6 @@ class TauriConfigGenerator
     /**
      * Update configuration for development mode.
      *
-     * @param  string  $host
-     * @param  int  $port
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -125,7 +117,6 @@ class TauriConfigGenerator
     /**
      * Update configuration for production mode.
      *
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -143,8 +134,6 @@ class TauriConfigGenerator
     /**
      * Save configuration to tauri.conf.json.
      *
-     * @param  array  $config
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -158,7 +147,7 @@ class TauriConfigGenerator
 
         $directory = dirname($this->configPath);
 
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 
@@ -170,13 +159,12 @@ class TauriConfigGenerator
     /**
      * Load configuration from tauri.conf.json.
      *
-     * @return array
      *
      * @throws TauriPhpException
      */
     public function load(): array
     {
-        if (!file_exists($this->configPath)) {
+        if (! file_exists($this->configPath)) {
             throw TauriPhpException::fileOperationFailed('read', $this->configPath, 'File does not exist');
         }
 
@@ -192,8 +180,6 @@ class TauriConfigGenerator
 
     /**
      * Check if tauri.conf.json exists.
-     *
-     * @return bool
      */
     public function exists(): bool
     {

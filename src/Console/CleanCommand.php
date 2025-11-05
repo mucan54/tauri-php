@@ -25,8 +25,6 @@ class CleanCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -34,15 +32,15 @@ class CleanCommand extends Command
             $this->info('🧹 Cleaning Tauri-PHP Build Artifacts');
             $this->newLine();
 
-            if (!$this->option('force')) {
-                if (!$this->confirm('This will remove all build artifacts and temporary files. Continue?')) {
+            if (! $this->option('force')) {
+                if (! $this->confirm('This will remove all build artifacts and temporary files. Continue?')) {
                     $this->info('Aborted.');
 
                     return Command::SUCCESS;
                 }
             }
 
-            $filesystem = new Filesystem();
+            $filesystem = new Filesystem;
 
             // Paths to clean
             $pathsToClean = [
@@ -63,8 +61,9 @@ class CleanCommand extends Command
             foreach ($pathsToClean as $path => $description) {
                 $fullPath = base_path($path);
 
-                if (!file_exists($fullPath)) {
+                if (! file_exists($fullPath)) {
                     $this->line("  ⊘ {$description}: not found");
+
                     continue;
                 }
 
@@ -101,13 +100,10 @@ class CleanCommand extends Command
 
     /**
      * Get the size of a directory.
-     *
-     * @param  string  $path
-     * @return int
      */
     protected function getDirectorySize(string $path): int
     {
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             return is_file($path) ? filesize($path) : 0;
         }
 
@@ -133,9 +129,6 @@ class CleanCommand extends Command
 
     /**
      * Format file size.
-     *
-     * @param  int  $bytes
-     * @return string
      */
     protected function formatFileSize(int $bytes): string
     {

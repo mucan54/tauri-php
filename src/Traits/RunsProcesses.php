@@ -4,18 +4,12 @@ namespace Mucan54\TauriPhp\Traits;
 
 use Mucan54\TauriPhp\Exceptions\TauriPhpException;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
 trait RunsProcesses
 {
     /**
      * Run a process synchronously.
      *
-     * @param  array  $command
-     * @param  string  $message
-     * @param  int|null  $timeout
-     * @param  string|null  $cwd
-     * @return string
      *
      * @throws TauriPhpException
      */
@@ -47,7 +41,7 @@ trait RunsProcesses
             }
         });
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             throw TauriPhpException::processExecutionFailed(
                 implode(' ', $command),
                 $process->getErrorOutput() ?: $output
@@ -59,10 +53,6 @@ trait RunsProcesses
 
     /**
      * Run a process asynchronously.
-     *
-     * @param  array  $command
-     * @param  string|null  $cwd
-     * @return Process
      */
     protected function runProcessAsync(array $command, ?string $cwd = null): Process
     {
@@ -75,9 +65,6 @@ trait RunsProcesses
 
     /**
      * Check if a command is available.
-     *
-     * @param  string  $command
-     * @return bool
      */
     protected function commandExists(string $command): bool
     {
@@ -92,10 +79,6 @@ trait RunsProcesses
 
     /**
      * Get the version of a command.
-     *
-     * @param  string  $command
-     * @param  string  $versionFlag
-     * @return string|null
      */
     protected function getCommandVersion(string $command, string $versionFlag = '--version'): ?string
     {
@@ -115,11 +98,6 @@ trait RunsProcesses
 
     /**
      * Wait for a URL to become available.
-     *
-     * @param  string  $url
-     * @param  int  $timeout
-     * @param  int  $interval
-     * @return bool
      */
     protected function waitForUrl(string $url, int $timeout = 30, int $interval = 1): bool
     {

@@ -29,8 +29,6 @@ class EnvTauriManager
 
     /**
      * Create a new EnvTauriManager instance.
-     *
-     * @param  string|null  $basePath
      */
     public function __construct(?string $basePath = null)
     {
@@ -41,15 +39,12 @@ class EnvTauriManager
     /**
      * Create .env.tauri file from template.
      *
-     * @param  string  $appName
-     * @param  array  $options
-     * @return void
      *
      * @throws TauriPhpException
      */
     public function createFromTemplate(string $appName, array $options = []): void
     {
-        $stubManager = new StubManager();
+        $stubManager = new StubManager;
 
         $replacements = array_merge([
             'APP_NAME' => $appName,
@@ -74,13 +69,12 @@ class EnvTauriManager
     /**
      * Load the .env.tauri file.
      *
-     * @return array
      *
      * @throws TauriPhpException
      */
     public function load(): array
     {
-        if (!$this->exists()) {
+        if (! $this->exists()) {
             throw TauriPhpException::configurationError('.env.tauri file not found. Run tauri:init first.');
         }
 
@@ -120,13 +114,12 @@ class EnvTauriManager
     /**
      * Get a configuration value.
      *
-     * @param  string  $key
      * @param  mixed  $default
      * @return mixed
      */
     public function get(string $key, $default = null)
     {
-        if (!$this->loaded) {
+        if (! $this->loaded) {
             $this->load();
         }
 
@@ -136,15 +129,12 @@ class EnvTauriManager
     /**
      * Set a configuration value.
      *
-     * @param  string  $key
-     * @param  string  $value
-     * @return void
      *
      * @throws TauriPhpException
      */
     public function set(string $key, string $value): void
     {
-        if (!$this->exists()) {
+        if (! $this->exists()) {
             throw TauriPhpException::configurationError('.env.tauri file not found.');
         }
 
@@ -173,8 +163,6 @@ class EnvTauriManager
 
     /**
      * Check if .env.tauri exists.
-     *
-     * @return bool
      */
     public function exists(): bool
     {
@@ -183,12 +171,10 @@ class EnvTauriManager
 
     /**
      * Get all configuration values.
-     *
-     * @return array
      */
     public function all(): array
     {
-        if (!$this->loaded) {
+        if (! $this->loaded) {
             $this->load();
         }
 
@@ -197,8 +183,6 @@ class EnvTauriManager
 
     /**
      * Get the path to the .env.tauri file.
-     *
-     * @return string
      */
     public function getPath(): string
     {

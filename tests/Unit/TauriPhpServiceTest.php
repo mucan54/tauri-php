@@ -2,8 +2,8 @@
 
 namespace Mucan54\TauriPhp\Tests\Unit;
 
-use Mucan54\TauriPhp\Tests\TestCase;
 use Mucan54\TauriPhp\Services\TauriPhpService;
+use Mucan54\TauriPhp\Tests\TestCase;
 
 class TauriPhpServiceTest extends TestCase
 {
@@ -12,7 +12,7 @@ class TauriPhpServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new TauriPhpService();
+        $this->service = new TauriPhpService;
     }
 
     /** @test */

@@ -47,8 +47,6 @@ class MobileDevCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -59,12 +57,12 @@ class MobileDevCommand extends Command
             $this->newLine();
 
             // Validate platform
-            if (!in_array($platform, ['android', 'ios'])) {
+            if (! in_array($platform, ['android', 'ios'])) {
                 throw TauriPhpException::configurationError("Invalid platform: {$platform}. Use 'android' or 'ios'");
             }
 
             // Validate mobile is initialized
-            if (!$this->isMobileInitialized($platform)) {
+            if (! $this->isMobileInitialized($platform)) {
                 throw TauriPhpException::configurationError("Mobile platform not initialized. Run: php artisan tauri:mobile-init {$platform}");
             }
 
@@ -107,9 +105,6 @@ class MobileDevCommand extends Command
 
     /**
      * Check if mobile platform is initialized.
-     *
-     * @param  string  $platform
-     * @return bool
      */
     protected function isMobileInitialized(string $platform): bool
     {
@@ -123,10 +118,6 @@ class MobileDevCommand extends Command
 
     /**
      * Start Laravel development server.
-     *
-     * @param  string  $host
-     * @param  int  $port
-     * @return void
      */
     protected function startLaravelServer(string $host, int $port): void
     {
@@ -147,9 +138,6 @@ class MobileDevCommand extends Command
     /**
      * Wait for server to be ready.
      *
-     * @param  string  $host
-     * @param  int  $port
-     * @return void
      *
      * @throws TauriPhpException
      */
@@ -159,7 +147,7 @@ class MobileDevCommand extends Command
 
         $url = "http://{$host}:{$port}";
 
-        if (!$this->waitForUrl($url, 30, 1)) {
+        if (! $this->waitForUrl($url, 30, 1)) {
             throw TauriPhpException::processExecutionFailed(
                 'Laravel server',
                 'Server did not become ready in time'
@@ -172,10 +160,6 @@ class MobileDevCommand extends Command
 
     /**
      * Display server information for mobile access.
-     *
-     * @param  string  $host
-     * @param  int  $port
-     * @return void
      */
     protected function displayServerInfo(string $host, int $port): void
     {
@@ -198,8 +182,6 @@ class MobileDevCommand extends Command
 
     /**
      * Get local IP address.
-     *
-     * @return string|null
      */
     protected function getLocalIp(): ?string
     {
@@ -224,9 +206,6 @@ class MobileDevCommand extends Command
 
     /**
      * Start mobile development.
-     *
-     * @param  string  $platform
-     * @return void
      */
     protected function startMobileDev(string $platform): void
     {
@@ -263,8 +242,6 @@ class MobileDevCommand extends Command
 
     /**
      * Start Android emulator.
-     *
-     * @return void
      */
     protected function startAndroidEmulator(): void
     {
@@ -273,7 +250,7 @@ class MobileDevCommand extends Command
             $process = new Process(['emulator', '-list-avds']);
             $process->run();
 
-            if (!$process->isSuccessful() || empty(trim($process->getOutput()))) {
+            if (! $process->isSuccessful() || empty(trim($process->getOutput()))) {
                 $this->warn('No Android emulators found. Create one in Android Studio AVD Manager.');
 
                 return;
@@ -301,8 +278,6 @@ class MobileDevCommand extends Command
 
     /**
      * Cleanup processes.
-     *
-     * @return void
      */
     protected function cleanup(): void
     {

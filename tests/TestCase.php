@@ -2,8 +2,8 @@
 
 namespace Mucan54\TauriPhp\Tests;
 
-use Orchestra\Testbench\TestCase as Orchestra;
 use Mucan54\TauriPhp\TauriPhpServiceProvider;
+use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
 {
