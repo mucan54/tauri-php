@@ -31,11 +31,21 @@ return [
     */
 
     'platforms' => [
+        // Desktop Platforms
         'linux-x64' => 'x86_64-unknown-linux-gnu',
         'linux-arm64' => 'aarch64-unknown-linux-gnu',
         'macos-x64' => 'x86_64-apple-darwin',
         'macos-arm64' => 'aarch64-apple-darwin',
         'windows-x64' => 'x86_64-pc-windows-msvc',
+
+        // Mobile Platforms
+        'android' => 'aarch64-linux-android',
+        'android-arm' => 'armv7-linux-androideabi',
+        'android-x64' => 'x86_64-linux-android',
+        'android-x86' => 'i686-linux-android',
+        'ios' => 'aarch64-apple-ios',
+        'ios-sim' => 'aarch64-apple-ios-sim',
+        'ios-x64' => 'x86_64-apple-ios',
     ],
 
     /*
@@ -148,6 +158,42 @@ return [
         'macos' => [
             'enabled' => env('TAURI_SIGN_MACOS', false),
             'signing_identity' => env('TAURI_MACOS_SIGNING_IDENTITY', ''),
+        ],
+        'android' => [
+            'enabled' => env('TAURI_SIGN_ANDROID', false),
+            'keystore' => env('TAURI_ANDROID_KEYSTORE', ''),
+            'keystore_password' => env('TAURI_ANDROID_KEYSTORE_PASSWORD', ''),
+            'key_alias' => env('TAURI_ANDROID_KEY_ALIAS', ''),
+            'key_password' => env('TAURI_ANDROID_KEY_PASSWORD', ''),
+        ],
+        'ios' => [
+            'enabled' => env('TAURI_SIGN_IOS', false),
+            'development_team' => env('TAURI_IOS_DEVELOPMENT_TEAM', ''),
+            'provisioning_profile' => env('TAURI_IOS_PROVISIONING_PROFILE', ''),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration specific to mobile platforms (Android and iOS).
+    |
+    */
+
+    'mobile' => [
+        'android' => [
+            'package_name' => env('TAURI_ANDROID_PACKAGE_NAME', ''),
+            'min_sdk_version' => env('TAURI_ANDROID_MIN_SDK', 24),
+            'target_sdk_version' => env('TAURI_ANDROID_TARGET_SDK', 33),
+            'version_code' => env('TAURI_ANDROID_VERSION_CODE', 1),
+            'ndk_version' => env('TAURI_ANDROID_NDK_VERSION', '25.2.9519653'),
+        ],
+        'ios' => [
+            'bundle_identifier' => env('TAURI_IOS_BUNDLE_IDENTIFIER', ''),
+            'deployment_target' => env('TAURI_IOS_DEPLOYMENT_TARGET', '13.0'),
+            'team_id' => env('TAURI_IOS_TEAM_ID', ''),
         ],
     ],
 

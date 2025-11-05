@@ -8,6 +8,8 @@ use Mucan54\TauriPhp\Console\BuildCommand;
 use Mucan54\TauriPhp\Console\DevCommand;
 use Mucan54\TauriPhp\Console\PackageCommand;
 use Mucan54\TauriPhp\Console\CleanCommand;
+use Mucan54\TauriPhp\Console\MobileInitCommand;
+use Mucan54\TauriPhp\Console\MobileDevCommand;
 use Mucan54\TauriPhp\Services\TauriPhpService;
 
 class TauriPhpServiceProvider extends ServiceProvider
@@ -56,6 +58,8 @@ class TauriPhpServiceProvider extends ServiceProvider
                 DevCommand::class,
                 PackageCommand::class,
                 CleanCommand::class,
+                MobileInitCommand::class,
+                MobileDevCommand::class,
             ]);
         }
     }

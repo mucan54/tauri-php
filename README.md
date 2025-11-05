@@ -4,13 +4,14 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/mucan54/tauri-php.svg?style=flat-square)](https://packagist.org/packages/mucan54/tauri-php)
 [![License](https://img.shields.io/packagist/l/mucan54/tauri-php.svg?style=flat-square)](https://packagist.org/packages/mucan54/tauri-php)
 
-Transform your Laravel applications into beautiful, fast, and secure cross-platform desktop applications using Tauri and FrankenPHP.
+Transform your Laravel applications into beautiful, fast, and secure cross-platform desktop and mobile applications using Tauri and FrankenPHP.
 
 ## ✨ Features
 
 - 🚀 **One-Command Initialization** - Get started with a single Artisan command
-- 🖥️ **Cross-Platform** - Build for Windows, macOS, and Linux from a single codebase
-- 📦 **Embedded PHP** - No PHP installation required on user machines thanks to FrankenPHP
+- 🖥️ **Desktop Support** - Build for Windows, macOS, and Linux from a single codebase
+- 📱 **Mobile Support** - Build native Android and iOS applications
+- 📦 **Embedded PHP** - No PHP installation required on user devices thanks to FrankenPHP
 - 🔒 **Code Protection** - Built-in PHP code obfuscation support
 - ⚡ **Hot Reload** - Fast development with hot reload support
 - 🎨 **Framework Agnostic** - Works with Vue, React, Svelte, or vanilla JavaScript
@@ -85,11 +86,14 @@ For detailed documentation, visit our [documentation directory](docs/):
 
 - [Installation Guide](docs/installation.md)
 - [Getting Started](docs/getting-started.md)
+- [Mobile Development](docs/mobile.md) 📱 **NEW!**
 - [Configuration Reference](docs/configuration.md)
 - [Building Applications](docs/building.md)
 - [Troubleshooting](docs/troubleshooting.md)
 
 ## 🎯 Available Commands
+
+### Desktop Commands
 
 | Command | Description |
 |---------|-------------|
@@ -98,6 +102,15 @@ For detailed documentation, visit our [documentation directory](docs/):
 | `php artisan tauri:build` | Build the application for production |
 | `php artisan tauri:package` | Create distribution packages |
 | `php artisan tauri:clean` | Clean build artifacts and temporary files |
+
+### Mobile Commands
+
+| Command | Description |
+|---------|-------------|
+| `php artisan tauri:mobile-init {platform}` | Initialize mobile platform (android/ios/both) |
+| `php artisan tauri:mobile-dev {platform}` | Run app on mobile device/emulator |
+| `php artisan tauri:build --platform=android` | Build Android application (APK/AAB) |
+| `php artisan tauri:build --platform=ios` | Build iOS application |
 
 ## ⚙️ Configuration
 
@@ -137,6 +150,8 @@ TAURI_OBFUSCATE_CODE=false
 
 ## 🌍 Supported Platforms
 
+### Desktop Platforms
+
 | Platform | Target Triple | Status |
 |----------|--------------|--------|
 | Linux x64 | `x86_64-unknown-linux-gnu` | ✅ Supported |
@@ -144,6 +159,16 @@ TAURI_OBFUSCATE_CODE=false
 | macOS x64 | `x86_64-apple-darwin` | ✅ Supported |
 | macOS ARM64 (M1/M2) | `aarch64-apple-darwin` | ✅ Supported |
 | Windows x64 | `x86_64-pc-windows-msvc` | ✅ Supported |
+
+### Mobile Platforms
+
+| Platform | Target Triple | Status |
+|----------|--------------|--------|
+| Android (ARM64) | `aarch64-linux-android` | ✅ Supported |
+| Android (ARMv7) | `armv7-linux-androideabi` | ✅ Supported |
+| Android (x86_64) | `x86_64-linux-android` | ✅ Supported |
+| iOS (ARM64) | `aarch64-apple-ios` | ✅ Supported |
+| iOS Simulator | `aarch64-apple-ios-sim` | ✅ Supported |
 
 ## 🔒 Code Obfuscation
 

@@ -21,11 +21,13 @@ class BuildCommand extends Command
      * @var string
      */
     protected $signature = 'tauri:build
-                            {--platform=all : Target platform (linux-x64|linux-arm64|macos-x64|macos-arm64|windows-x64|all)}
+                            {--platform=all : Target platform (desktop: linux-x64|macos-x64|windows-x64|all, mobile: android|ios)}
                             {--obfuscate : Obfuscate PHP code}
                             {--debug : Build in debug mode}
                             {--skip-deps : Skip installing dependencies}
                             {--force : Force rebuild of FrankenPHP binaries}
+                            {--apk : Build APK for Android (default is AAB)}
+                            {--open : Open in Xcode after build (iOS only)}
                             {--verbose : Show detailed output}';
 
     /**
@@ -33,7 +35,7 @@ class BuildCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Build the Tauri-PHP desktop application';
+    protected $description = 'Build the Tauri-PHP application for desktop or mobile';
 
     /**
      * Execute the console command.
@@ -43,6 +45,13 @@ class BuildCommand extends Command
     public function handle(): int
     {
         try {
+            $platform = $this->option('platform');
+
+            // Check if building for mobile
+            if (in_array($platform, ['android', 'ios'])) {
+                return $this->handleMobileBuild($platform);
+            }
+
             $this->info('🔨 Building Tauri-PHP Desktop Application');
             $this->newLine();
 
@@ -390,5 +399,158 @@ class BuildCommand extends Command
         }
 
         return round($bytes, 2).' '.$units[$index];
+    }
+
+    /**
+     * Handle mobile platform build.
+     *
+     * @param  string  $platform
+     * @return int
+     *
+     * @throws TauriPhpException
+     */
+    protected function handleMobileBuild(string $platform): int
+    {
+        $this->info("📱 Building Tauri-PHP Mobile Application ({$platform})");
+        $this->newLine();
+
+        // Validate mobile is initialized
+        if (!$this->isMobileInitialized($platform)) {
+            throw TauriPhpException::configurationError(
+                "Mobile platform not initialized. Run: php artisan tauri:mobile-init {$platform}"
+            );
+        }
+
+        // Load configuration
+        $envManager = new EnvTauriManager();
+
+        if (!$envManager->exists()) {
+            throw TauriPhpException::configurationError('Run tauri:init first to initialize the project');
+        }
+
+        $envManager->load();
+
+        // Install dependencies
+        if (!$this->option('skip-deps')) {
+            $this->installDependencies();
+        }
+
+        // Optimize Laravel
+        $this->optimizeLaravel();
+
+        // Prepare embedded app
+        $this->prepareEmbeddedApp();
+
+        // Obfuscate code (if requested)
+        if ($this->option('obfuscate')) {
+            $this->obfuscateCode();
+        }
+
+        // Build mobile application
+        $this->buildMobileApp($platform);
+
+        $this->newLine();
+        $this->info('✅ Mobile build completed successfully!');
+
+        $this->displayMobileBuildResults($platform);
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * Check if mobile platform is initialized.
+     *
+     * @param  string  $platform
+     * @return bool
+     */
+    protected function isMobileInitialized(string $platform): bool
+    {
+        $paths = [
+            'android' => 'src-tauri/gen/android',
+            'ios' => 'src-tauri/gen/apple',
+        ];
+
+        return is_dir(base_path($paths[$platform]));
+    }
+
+    /**
+     * Build mobile application.
+     *
+     * @param  string  $platform
+     * @return void
+     *
+     * @throws TauriPhpException
+     */
+    protected function buildMobileApp(string $platform): void
+    {
+        $this->line("📱 Building {$platform} application...");
+
+        $command = ['npm', 'run', 'tauri', $platform, 'build'];
+
+        // Add platform-specific flags
+        if ($platform === 'android') {
+            if ($this->option('apk')) {
+                $command[] = '--';
+                $command[] = '--apk';
+            }
+
+            if ($this->option('debug')) {
+                $command[] = '--';
+                $command[] = '--debug';
+            }
+        } elseif ($platform === 'ios') {
+            if ($this->option('open')) {
+                $command[] = '--';
+                $command[] = '--open';
+            }
+        }
+
+        $this->runProcess($command, "Building {$platform} app...", 1800);
+
+        $this->line("  ✓ {$platform} build completed");
+        $this->newLine();
+    }
+
+    /**
+     * Display mobile build results.
+     *
+     * @param  string  $platform
+     * @return void
+     */
+    protected function displayMobileBuildResults(string $platform): void
+    {
+        $this->line('📁 Build artifacts:');
+
+        if ($platform === 'android') {
+            $outputDir = base_path('src-tauri/gen/android/app/build/outputs');
+
+            if (is_dir($outputDir)) {
+                $apks = glob($outputDir.'/apk/**/*.apk');
+                $aabs = glob($outputDir.'/bundle/**/*.aab');
+
+                foreach (array_merge($apks, $aabs) as $artifact) {
+                    $size = $this->formatFileSize(filesize($artifact));
+                    $relativePath = str_replace(base_path().'/', '', $artifact);
+                    $this->line("  • {$relativePath} ({$size})");
+                }
+            } else {
+                $this->warn('  No build artifacts found');
+            }
+        } elseif ($platform === 'ios') {
+            $outputDir = base_path('src-tauri/gen/apple/build/Release-iphoneos');
+
+            if (is_dir($outputDir)) {
+                $apps = glob($outputDir.'/*.app');
+
+                foreach ($apps as $app) {
+                    $relativePath = str_replace(base_path().'/', '', $app);
+                    $this->line("  • {$relativePath}");
+                }
+            } else {
+                $this->warn('  No build artifacts found');
+            }
+        }
+
+        $this->newLine();
     }
 }
