@@ -21,8 +21,7 @@ class MobileDevCommand extends Command
                             {--device= : Specific device to run on}
                             {--emulator : Run on emulator/simulator instead of physical device}
                             {--host=0.0.0.0 : Development server host (0.0.0.0 for mobile access)}
-                            {--port=8080 : Development server port}
-                            {--verbose : Show detailed output}';
+                            {--port=8080 : Development server port}';
 
     /**
      * The console command description.

@@ -19,8 +19,7 @@ class PackageCommand extends Command
     protected $signature = 'tauri:package
                             {--format=all : Package format (dmg|app|msi|nsis|deb|appimage|all)}
                             {--sign : Sign the package}
-                            {--output= : Output directory}
-                            {--verbose : Show detailed output}';
+                            {--output= : Output directory}';
 
     /**
      * The console command description.

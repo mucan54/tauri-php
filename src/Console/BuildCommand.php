@@ -27,8 +27,7 @@ class BuildCommand extends Command
                             {--skip-deps : Skip installing dependencies}
                             {--force : Force rebuild of FrankenPHP binaries}
                             {--apk : Build APK for Android (default is AAB)}
-                            {--open : Open in Xcode after build (iOS only)}
-                            {--verbose : Show detailed output}';
+                            {--open : Open in Xcode after build (iOS only)}';
 
     /**
      * The console command description.
