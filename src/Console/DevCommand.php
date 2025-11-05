@@ -20,8 +20,7 @@ class DevCommand extends Command
      */
     protected $signature = 'tauri:dev
                             {--host=127.0.0.1 : Development server host}
-                            {--port=8080 : Development server port}
-                            {--verbose : Show detailed output}';
+                            {--port=8080 : Development server port}';
 
     /**
      * The console command description.

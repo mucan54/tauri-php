@@ -23,8 +23,7 @@ class InitCommand extends Command
                             {--identifier= : Application identifier (com.company.app)}
                             {--php-version=8.3 : PHP version}
                             {--extensions= : PHP extensions (comma-separated)}
-                            {--force : Overwrite existing files}
-                            {--verbose : Show detailed output}';
+                            {--force : Overwrite existing files}';
 
     /**
      * The console command description.

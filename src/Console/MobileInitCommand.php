@@ -19,8 +19,7 @@ class MobileInitCommand extends Command
     protected $signature = 'tauri:mobile-init
                             {platform : Mobile platform (android|ios|both)}
                             {--package-name= : Android package name or iOS bundle identifier}
-                            {--team-id= : iOS team ID (required for iOS)}
-                            {--verbose : Show detailed output}';
+                            {--team-id= : iOS team ID (required for iOS)}';
 
     /**
      * The console command description.
