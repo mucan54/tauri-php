@@ -22,8 +22,8 @@ Transform your Laravel applications into beautiful, fast, and secure cross-platf
 
 Before using Tauri-PHP, ensure you have the following installed:
 
-- **PHP 8.1 or higher**
-- **Laravel 10.x or 11.x**
+- **PHP 8.0 or higher** (8.0, 8.1, 8.2, or 8.3)
+- **Laravel 9.x, 10.x, or 11.x**
 - **Node.js 18+** and npm
 - **Rust and Cargo** - Install from [rustup.rs](https://rustup.rs/)
 - **Docker** (optional, for cross-platform builds)
