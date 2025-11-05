@@ -22,17 +22,17 @@
     }
   ],
   "require": {
-    "php": "^8.1|^8.2|^8.3",
-    "illuminate/support": "^10.0|^11.0",
-    "illuminate/console": "^10.0|^11.0",
-    "symfony/process": "^6.0|^7.0",
-    "symfony/filesystem": "^6.0|^7.0"
+    "php": "^8.0|^8.1|^8.2|^8.3",
+    "illuminate/support": "^9.0|^10.0|^11.0",
+    "illuminate/console": "^9.0|^10.0|^11.0",
+    "symfony/process": "^5.4|^6.0|^7.0",
+    "symfony/filesystem": "^5.4|^6.0|^7.0"
   },
   "require-dev": {
-    "laravel/pint": "^1.25",
-    "mockery/mockery": "^1.6",
-    "orchestra/testbench": "^8.0|^9.0",
-    "phpunit/phpunit": "^10.0"
+    "laravel/pint": "^1.0",
+    "mockery/mockery": "^1.5",
+    "orchestra/testbench": "^7.0|^8.0|^9.0",
+    "phpunit/phpunit": "^9.5|^10.0"
   },
   "autoload": {
     "psr-4": {
