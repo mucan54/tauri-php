@@ -204,10 +204,21 @@ class MobileInitCommand extends Command
     {
         $this->line('🍎 Initializing iOS...');
 
+        // Try to get team ID from CLI option or .env.tauri
         $teamId = $this->option('team-id');
 
         if (! $teamId) {
-            throw TauriPhpException::configurationError('iOS requires --team-id option. Get your Team ID from https://developer.apple.com/account');
+            $envManager = new EnvTauriManager;
+            $teamId = $envManager->get('TAURI_IOS_TEAM_ID');
+        }
+
+        if (! $teamId) {
+            throw TauriPhpException::configurationError(
+                'iOS requires a Team ID. Either:'.PHP_EOL.
+                '  - Add TAURI_IOS_TEAM_ID to .env.tauri, or'.PHP_EOL.
+                '  - Pass --team-id=YOUR_TEAM_ID option'.PHP_EOL.
+                'Get your Team ID from https://developer.apple.com/account'
+            );
         }
 
         $this->runProcess(
@@ -249,10 +260,13 @@ class MobileInitCommand extends Command
 
         if ($platform === 'android' || $platform === 'both') {
             $envManager->set('TAURI_ANDROID_PACKAGE_NAME', $packageName);
+            $envManager->set('TAURI_ANDROID_MIN_SDK', '24');
+            $envManager->set('TAURI_ANDROID_TARGET_SDK', '33');
         }
 
         if ($platform === 'ios' || $platform === 'both') {
             $envManager->set('TAURI_IOS_BUNDLE_IDENTIFIER', $packageName);
+            $envManager->set('TAURI_IOS_DEPLOYMENT_TARGET', '13.0');
 
             if ($teamId = $this->option('team-id')) {
                 $envManager->set('TAURI_IOS_TEAM_ID', $teamId);
