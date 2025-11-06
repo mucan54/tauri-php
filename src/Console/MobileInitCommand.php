@@ -268,7 +268,26 @@ class MobileInitCommand extends Command
      */
     protected function isTauriInitialized(): bool
     {
-        return file_exists(base_path('src-tauri/Cargo.toml'));
+        // Check if Cargo.toml exists
+        if (! file_exists(base_path('src-tauri/Cargo.toml'))) {
+            return false;
+        }
+
+        // Check if package.json exists
+        if (! file_exists(base_path('package.json'))) {
+            throw TauriPhpException::configurationError(
+                'package.json not found. Run "php artisan tauri:init" first to initialize the desktop project.'
+            );
+        }
+
+        // Check if npm dependencies are installed
+        if (! file_exists(base_path('node_modules/@tauri-apps/cli'))) {
+            throw TauriPhpException::configurationError(
+                'Tauri CLI not installed. Run "npm install" in your project directory.'
+            );
+        }
+
+        return true;
     }
 
     /**
