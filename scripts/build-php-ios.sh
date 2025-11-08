@@ -167,6 +167,7 @@ build_php() {
         --with-openssl \
         --with-zlib \
         --enable-posix \
+        --disable-fiber \
         --disable-opcache \
         --disable-phpdbg \
         --without-pcre-jit \
