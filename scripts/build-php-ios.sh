@@ -150,6 +150,7 @@ build_php() {
         --enable-static \
         --disable-shared \
         --disable-all \
+        --enable-libxml \
         --enable-mysqlnd \
         --enable-pdo \
         --with-pdo-mysql=mysqlnd \
