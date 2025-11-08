@@ -138,6 +138,13 @@ build_php() {
 
     cd "${BUILD_PHP_DIR}/php-src"
 
+    # Remove fiber assembly files (ELF format incompatible with iOS Mach-O)
+    # We use ucontext implementation instead via ZEND_FIBER_UCONTEXT
+    if [ -d "Zend/asm" ]; then
+        log_info "Removing incompatible fiber assembly files..."
+        rm -rf Zend/asm/*.S
+    fi
+
     # Clean previous builds
     make clean 2>/dev/null || true
 
