@@ -64,6 +64,30 @@ trait RunsProcesses
     }
 
     /**
+     * Run a process silently without output.
+     *
+     * @throws \Exception
+     */
+    protected function runProcessSilent(array $command, ?int $timeout = 10, ?string $cwd = null): string
+    {
+        $process = new Process(
+            $command,
+            $cwd ?? base_path(),
+            null,
+            null,
+            $timeout
+        );
+
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            throw new \Exception($process->getErrorOutput() ?: $process->getOutput());
+        }
+
+        return $process->getOutput();
+    }
+
+    /**
      * Check if a command is available.
      */
     protected function commandExists(string $command): bool

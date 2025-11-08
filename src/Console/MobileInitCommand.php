@@ -294,10 +294,30 @@ class MobileInitCommand extends Command
             );
         }
 
+        // Verify package.json has tauri script
+        $packageJson = json_decode(file_get_contents(base_path('package.json')), true);
+        if (! isset($packageJson['scripts']['tauri'])) {
+            throw TauriPhpException::configurationError(
+                'Tauri script not found in package.json. Run "php artisan tauri:init" to set up the project properly.'
+            );
+        }
+
         // Check if npm dependencies are installed
         if (! file_exists(base_path('node_modules/@tauri-apps/cli'))) {
             throw TauriPhpException::configurationError(
-                'Tauri CLI not installed. Run "npm install" in your project directory.'
+                'Tauri CLI not installed. Run "npm install" in your project directory to install dependencies.'
+            );
+        }
+
+        // Verify tauri command is actually available
+        try {
+            $result = $this->runProcessSilent(['npm', 'run', 'tauri', '--', '--version']);
+            if (! str_contains($result, 'tauri-cli')) {
+                throw new \Exception('Tauri CLI version check failed');
+            }
+        } catch (\Exception $e) {
+            throw TauriPhpException::configurationError(
+                'Tauri CLI is not working properly. Try running "npm install" to reinstall dependencies.'
             );
         }
 
