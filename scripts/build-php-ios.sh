@@ -93,6 +93,10 @@ setup_ios_env() {
         export HOST="$ARCH-apple-ios"
     fi
 
+    # Bypass autoconf header check for ucontext.h during cross-compilation
+    # iOS SDK has ucontext.h but autoconf can't detect it properly in cross-compile mode
+    export ac_cv_header_ucontext_h=yes
+
     log_info "Environment configured for $PLATFORM ($ARCH)"
 }
 
