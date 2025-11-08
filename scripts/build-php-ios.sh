@@ -150,6 +150,7 @@ build_php() {
         --enable-static \
         --disable-shared \
         --disable-all \
+        --disable-fiber-asm \
         --with-libxml \
         --enable-mysqlnd \
         --enable-pdo \
@@ -167,7 +168,6 @@ build_php() {
         --with-openssl \
         --with-zlib \
         --enable-posix \
-        --disable-fiber \
         --disable-opcache \
         --disable-phpdbg \
         --without-pcre-jit \
