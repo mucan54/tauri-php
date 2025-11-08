@@ -170,6 +170,7 @@ build_php() {
         --with-pdo-sqlite \
         --with-sqlite3 \
         --enable-mbstring \
+        --disable-mbregex \
         --enable-bcmath \
         --enable-ctype \
         --enable-fileinfo \
@@ -177,7 +178,7 @@ build_php() {
         --enable-xml \
         --enable-simplexml \
         --enable-dom \
-        --with-openssl \
+        --without-openssl \
         --with-zlib \
         --enable-posix \
         --disable-opcache \
