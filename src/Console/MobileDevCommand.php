@@ -65,6 +65,9 @@ class MobileDevCommand extends Command
                 throw TauriPhpException::configurationError("Mobile platform not initialized. Run: php artisan tauri:mobile-init {$platform}");
             }
 
+            // Check and build PHP binary if missing
+            $this->ensurePhpBinaryExists($platform);
+
             // Get development server settings
             $host = $this->option('host');
             $port = $this->option('port');
@@ -113,6 +116,213 @@ class MobileDevCommand extends Command
         ];
 
         return is_dir(base_path($paths[$platform]));
+    }
+
+    /**
+     * Ensure PHP binary exists for the platform, build if missing.
+     *
+     * @throws TauriPhpException
+     */
+    protected function ensurePhpBinaryExists(string $platform): void
+    {
+        $binaryPath = $this->getPhpBinaryPath($platform);
+
+        if (file_exists($binaryPath)) {
+            $this->line("✓ PHP binary found: {$binaryPath}");
+            $this->newLine();
+
+            return;
+        }
+
+        $this->warn("⚠️  PHP binary not found for {$platform}");
+        $this->info("Building PHP binary automatically...");
+        $this->newLine();
+
+        $this->buildPhpBinary($platform);
+
+        // Verify build succeeded
+        if (! file_exists($binaryPath)) {
+            throw TauriPhpException::configurationError(
+                "PHP binary build failed. Binary not found at: {$binaryPath}"
+            );
+        }
+
+        $this->info("✅ PHP binary built successfully!");
+        $this->newLine();
+    }
+
+    /**
+     * Get the expected PHP binary path for the platform.
+     */
+    protected function getPhpBinaryPath(string $platform): string
+    {
+        $binariesDir = base_path('binaries');
+        $binaries = [
+            'ios' => 'php-iphonesimulator-arm64', // Use simulator binary for dev
+            'android' => 'php-android-aarch64',
+        ];
+
+        return "{$binariesDir}/{$binaries[$platform]}";
+    }
+
+    /**
+     * Build PHP binary for the platform.
+     *
+     * @throws TauriPhpException
+     */
+    protected function buildPhpBinary(string $platform): void
+    {
+        if ($platform === 'ios') {
+            $this->buildPhpForIos();
+        } elseif ($platform === 'android') {
+            $this->buildPhpForAndroid();
+        }
+    }
+
+    /**
+     * Build PHP for iOS.
+     *
+     * @throws TauriPhpException
+     */
+    protected function buildPhpForIos(): void
+    {
+        // Check if running on macOS
+        if (PHP_OS_FAMILY !== 'Darwin') {
+            throw TauriPhpException::configurationError(
+                'iOS PHP binary compilation requires macOS. Please build on a Mac or use pre-built binaries.'
+            );
+        }
+
+        // Check if Xcode is installed
+        $xcodePath = trim(shell_exec('xcode-select -p 2>/dev/null') ?? '');
+        if (empty($xcodePath) || ! is_dir($xcodePath)) {
+            throw TauriPhpException::configurationError(
+                'Xcode is not installed. Install Xcode from the App Store and run: sudo xcode-select --switch /Applications/Xcode.app'
+            );
+        }
+
+        // Find the build script
+        $scriptPath = $this->findBuildScript('build-php-ios.sh');
+
+        if (! $scriptPath) {
+            throw TauriPhpException::configurationError(
+                'Build script not found. Expected: vendor/mucan54/tauri-php/scripts/build-php-ios.sh'
+            );
+        }
+
+        $this->line("📦 Building PHP for iOS (this may take 15-30 minutes)...");
+        $this->line("  Script: {$scriptPath}");
+        $this->newLine();
+
+        // Make script executable
+        chmod($scriptPath, 0755);
+
+        // Run the build script
+        $process = new Process(['bash', $scriptPath], dirname($scriptPath));
+        $process->setTimeout(3600); // 1 hour timeout
+
+        $this->info('Build started...');
+        $this->newLine();
+
+        $process->run(function ($type, $buffer) {
+            // Show output to user
+            echo $buffer;
+        });
+
+        if (! $process->isSuccessful()) {
+            throw TauriPhpException::processExecutionFailed(
+                'PHP build script',
+                $process->getErrorOutput()
+            );
+        }
+
+        // Copy binaries to project root binaries directory
+        $this->copyPhpBinariesToProject();
+    }
+
+    /**
+     * Build PHP for Android.
+     *
+     * @throws TauriPhpException
+     */
+    protected function buildPhpForAndroid(): void
+    {
+        $scriptPath = $this->findBuildScript('build-php-android.sh');
+
+        if (! $scriptPath) {
+            throw TauriPhpException::configurationError(
+                "Android build script not yet implemented. \n".
+                "Please check documentation for manual build instructions or wait for v1.4.0."
+            );
+        }
+
+        // Similar implementation as iOS when Android script is ready
+        $this->warn('Android automatic build not yet implemented.');
+        $this->warn('Please build manually or wait for v1.4.0 release.');
+
+        throw TauriPhpException::configurationError('Android PHP binary build not available yet.');
+    }
+
+    /**
+     * Find the build script in package or vendor directory.
+     */
+    protected function findBuildScript(string $scriptName): ?string
+    {
+        $possiblePaths = [
+            base_path("scripts/{$scriptName}"), // In project root (if package is being developed)
+            base_path("vendor/mucan54/tauri-php/scripts/{$scriptName}"), // In vendor
+        ];
+
+        foreach ($possiblePaths as $path) {
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Copy PHP binaries from vendor to project binaries directory.
+     */
+    protected function copyPhpBinariesToProject(): void
+    {
+        $vendorBinaries = base_path('vendor/mucan54/tauri-php/binaries');
+        $projectBinaries = base_path('binaries');
+
+        // Create project binaries directory if it doesn't exist
+        if (! is_dir($projectBinaries)) {
+            mkdir($projectBinaries, 0755, true);
+        }
+
+        // Check if build script created binaries in vendor
+        if (is_dir($vendorBinaries)) {
+            $files = glob("{$vendorBinaries}/php-*");
+
+            foreach ($files as $file) {
+                $filename = basename($file);
+                $destination = "{$projectBinaries}/{$filename}";
+
+                if (copy($file, $destination)) {
+                    $this->line("  ✓ Copied {$filename} to project binaries/");
+                }
+            }
+        }
+
+        // Also check if binaries were created in scripts/../binaries
+        $scriptBinaries = dirname($this->findBuildScript('build-php-ios.sh') ?? '') . '/../binaries';
+        if (is_dir($scriptBinaries)) {
+            $files = glob("{$scriptBinaries}/php-*");
+
+            foreach ($files as $file) {
+                $filename = basename($file);
+                $destination = "{$projectBinaries}/{$filename}";
+
+                if (! file_exists($destination) && copy($file, $destination)) {
+                    $this->line("  ✓ Copied {$filename} to project binaries/");
+                }
+            }
+        }
     }
 
     /**
