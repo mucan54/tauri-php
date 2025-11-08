@@ -61,8 +61,34 @@ class TauriConfigGenerator
                     'src-tauri/icons/icon.ico',
                 ],
                 'resources' => [],
-                'externalBin' => [
-                    'binaries/frankenphp',
+                // Desktop platforms use FrankenPHP
+                'externalBin' => [],
+                // Platform-specific binaries
+                'iOS' => [
+                    'frameworks' => [],
+                    'externalBin' => [
+                        'binaries/php-iphoneos-arm64',
+                    ],
+                ],
+                'android' => [
+                    'externalBin' => [
+                        'binaries/php-android-aarch64',
+                    ],
+                ],
+                'windows' => [
+                    'externalBin' => [
+                        'binaries/frankenphp',
+                    ],
+                ],
+                'macOS' => [
+                    'externalBin' => [
+                        'binaries/frankenphp',
+                    ],
+                ],
+                'linux' => [
+                    'externalBin' => [
+                        'binaries/frankenphp',
+                    ],
                 ],
                 'copyright' => '',
                 'category' => 'DeveloperTool',
