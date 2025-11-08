@@ -190,8 +190,23 @@ class MobileDevCommand extends Command
             if (preg_match('/IPv4 Address[^\d]+([\d.]+)/', $output, $matches)) {
                 return $matches[1];
             }
+        } elseif (PHP_OS_FAMILY === 'Darwin') {
+            // macOS - try common network interfaces
+            foreach (['en0', 'en1'] as $interface) {
+                $output = shell_exec("ipconfig getifaddr {$interface} 2>/dev/null");
+                if ($output && trim($output)) {
+                    return trim($output);
+                }
+            }
+
+            // Fallback: parse ifconfig output
+            $output = shell_exec('ifconfig | grep "inet " | grep -v 127.0.0.1 | head -n1');
+            if ($output && preg_match('/inet ([\d.]+)/', $output, $matches)) {
+                return $matches[1];
+            }
         } else {
-            $output = shell_exec('hostname -I');
+            // Linux
+            $output = shell_exec('hostname -I 2>/dev/null');
 
             if ($output) {
                 $ips = explode(' ', trim($output));
