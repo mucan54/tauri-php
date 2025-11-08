@@ -73,8 +73,9 @@ setup_ios_env() {
     export PLATFORM=$PLATFORM
 
     # Compiler flags
-    export CFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode"
-    export CXXFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode"
+    # Force ucontext-based fiber implementation (not assembly) for iOS compatibility
+    export CFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode -DZEND_FIBER_UCONTEXT"
+    export CXXFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode -DZEND_FIBER_UCONTEXT"
     export LDFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION"
 
     # Toolchain
@@ -150,7 +151,6 @@ build_php() {
         --enable-static \
         --disable-shared \
         --disable-all \
-        --disable-fiber-asm \
         --with-libxml \
         --enable-mysqlnd \
         --enable-pdo \
