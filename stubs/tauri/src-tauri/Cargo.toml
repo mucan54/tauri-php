@@ -5,6 +5,10 @@ description = "A Tauri-PHP Desktop Application"
 authors = ["you"]
 edition = "2021"
 
+[lib]
+name = "{{APP_NAME_SANITIZED}}_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 

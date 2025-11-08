@@ -279,6 +279,7 @@ class InitCommand extends Command
 
         // Copy Rust files
         $stubManager->copy('tauri/src-tauri/src/main.rs', base_path('src-tauri/src/main.rs'), $replacements);
+        $stubManager->copy('tauri/src-tauri/src/lib.rs', base_path('src-tauri/src/lib.rs'), $replacements);
         $stubManager->copy('tauri/src-tauri/Cargo.toml', base_path('src-tauri/Cargo.toml'), $replacements);
         $stubManager->copy('tauri/src-tauri/build.rs', base_path('src-tauri/build.rs'), $replacements);
         $stubManager->copy('tauri/src-tauri/capabilities/default.json', base_path('src-tauri/capabilities/default.json'), $replacements);
