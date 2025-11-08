@@ -187,10 +187,14 @@ class InitCommand extends Command
     {
         $this->line('📦 Installing Node.js dependencies...');
 
-        // Create package.json if it doesn't exist
+        // Setup package.json with Tauri configuration
         $packageJsonPath = base_path('package.json');
 
-        if (! file_exists($packageJsonPath)) {
+        if (file_exists($packageJsonPath)) {
+            // Merge Tauri config into existing package.json
+            $this->updatePackageJson($packageJsonPath);
+        } else {
+            // Create new package.json from stub
             $stubManager = new StubManager;
             $stubManager->copy('package.json', $packageJsonPath);
         }
@@ -201,6 +205,38 @@ class InitCommand extends Command
         );
 
         $this->newLine();
+    }
+
+    /**
+     * Update existing package.json with Tauri configuration.
+     */
+    protected function updatePackageJson(string $path): void
+    {
+        $packageJson = json_decode(file_get_contents($path), true);
+
+        // Add Tauri scripts
+        if (! isset($packageJson['scripts'])) {
+            $packageJson['scripts'] = [];
+        }
+
+        $packageJson['scripts']['tauri'] = 'tauri';
+        $packageJson['scripts']['tauri:dev'] = 'tauri dev';
+        $packageJson['scripts']['tauri:build'] = 'tauri build';
+
+        // Add Tauri CLI to devDependencies
+        if (! isset($packageJson['devDependencies'])) {
+            $packageJson['devDependencies'] = [];
+        }
+
+        $packageJson['devDependencies']['@tauri-apps/cli'] = '^2.0.0';
+
+        // Write back to file with pretty formatting
+        file_put_contents(
+            $path,
+            json_encode($packageJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
+        );
+
+        $this->line('  ✓ Updated package.json with Tauri configuration');
     }
 
     /**
