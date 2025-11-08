@@ -226,23 +226,25 @@ class MobileDevCommand extends Command
         $this->line("📱 Starting {$platform} development...");
         $this->newLine();
 
-        $command = ['npm', 'run', 'tauri', $platform, 'dev'];
+        $command = ['npm', 'run', 'tauri', '--', $platform, 'dev'];
 
-        // Add device option if specified
+        // Handle device/emulator selection
         if ($device = $this->option('device')) {
-            $command[] = '--';
-            $command[] = '--device';
+            // Device specified directly - use it as positional argument
             $command[] = $device;
-        }
-
-        // Add open flag for emulator/simulator
-        if ($this->option('emulator')) {
+        } elseif ($this->option('emulator')) {
+            // Emulator flag - automatically select a simulator
             if ($platform === 'android') {
                 $this->info('Starting Android emulator...');
                 $this->startAndroidEmulator();
             } elseif ($platform === 'ios') {
                 $this->info('Starting iOS simulator...');
-                // iOS simulator is started automatically by Tauri
+                // Get available simulators and pick the first booted one or default
+                $simulator = $this->getAvailableIosSimulator();
+                if ($simulator) {
+                    $this->line("  Using simulator: {$simulator}");
+                    $command[] = $simulator;
+                }
             }
         }
 
@@ -252,6 +254,37 @@ class MobileDevCommand extends Command
         $this->mobileProcess->run(function ($type, $buffer) {
             echo $buffer;
         });
+    }
+
+    /**
+     * Get an available iOS simulator.
+     */
+    protected function getAvailableIosSimulator(): ?string
+    {
+        try {
+            $process = new Process(['xcrun', 'simctl', 'list', 'devices', 'available', 'iPhone']);
+            $process->run();
+
+            if (! $process->isSuccessful()) {
+                return null;
+            }
+
+            $output = $process->getOutput();
+
+            // Try to find iPhone 15 or any recent iPhone
+            if (preg_match('/iPhone \d+( Pro| Plus)?\s+\(([A-F0-9-]+)\)\s+\(Booted\)/i', $output, $matches)) {
+                return $matches[2]; // Return booted simulator UUID
+            }
+
+            // If no booted simulator, find any available one
+            if (preg_match('/iPhone \d+( Pro| Plus)?\s+\(([A-F0-9-]+)\)/i', $output, $matches)) {
+                return $matches[2]; // Return simulator UUID
+            }
+        } catch (\Exception $e) {
+            // Fallback - let Tauri handle it
+        }
+
+        return null;
     }
 
     /**
