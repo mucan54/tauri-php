@@ -74,8 +74,9 @@ setup_ios_env() {
 
     # Compiler flags
     # Force ucontext-based fiber implementation (not assembly) for iOS compatibility
-    export CFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode -DZEND_FIBER_UCONTEXT"
-    export CXXFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode -DZEND_FIBER_UCONTEXT"
+    # _XOPEN_SOURCE required by iOS SDK's ucontext.h to expose deprecated ucontext functions
+    export CFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode -DZEND_FIBER_UCONTEXT -D_XOPEN_SOURCE=1"
+    export CXXFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode -DZEND_FIBER_UCONTEXT -D_XOPEN_SOURCE=1"
     export LDFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION"
 
     # Toolchain
