@@ -178,6 +178,7 @@ build_php() {
         --disable-opcache \
         --disable-phpdbg \
         --without-pcre-jit \
+        --disable-fiber-asm \
         --prefix="${BUILD_PHP_DIR}/install"
 
     # Build
