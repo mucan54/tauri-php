@@ -72,17 +72,22 @@ php artisan tauri:mobile-dev ios --emulator
 
 ### ✅ What Works Now
 
-- PHP compilation for iOS ARM64
-- Static binary with Laravel extensions
-- Library target for Rust/Tauri
-- Platform-specific binary bundling
+- ✅ PHP compilation for iOS ARM64
+- ✅ Static binary with Laravel extensions
+- ✅ Library target for Rust/Tauri
+- ✅ Platform-specific binary bundling
+- ✅ Rust lib.rs spawns embedded PHP binary on iOS
+- ✅ Automatic iOS filesystem setup
+- ✅ Laravel path configuration for iOS sandbox
+- ✅ First-launch directory initialization
 
 ### 🚧 What's Next
 
-1. **Update lib.rs to spawn iOS PHP binary** (in progress)
-2. **Configure Laravel paths for iOS sandbox**
-3. **Test full Laravel on device**
-4. **Android support** (similar approach)
+1. **Build PHP binaries** (`./scripts/build-php-ios.sh`)
+2. **Test on iOS simulator** with real Laravel project
+3. **Bundle Laravel app files** in iOS package
+4. **Test full stack** on real device
+5. **Android support** (similar approach)
 
 ## Architecture
 
