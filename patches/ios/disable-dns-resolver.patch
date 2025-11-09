@@ -1,16 +1,14 @@
 --- a/ext/standard/dns.c
 +++ b/ext/standard/dns.c
-@@ -329,6 +329,13 @@ PHP_FUNCTION(gethostbyname)
+@@ -329,6 +329,12 @@ PHP_FUNCTION(gethostbyname)
  /* }}} */
 
- #if HAVE_FULL_DNS_FUNCS
-+
 +/* iOS does not expose BSD resolver internals (HEADER, C_IN, etc.) even with feature test macros.
-+   Stub out these functions to return false/empty on iOS. */
++   Disable full DNS functions on iOS to avoid compilation errors. */
 +#if defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_SIMULATOR)
 +#undef HAVE_FULL_DNS_FUNCS
 +#endif
 +
+ #if HAVE_FULL_DNS_FUNCS
+
  /* {{{ php_dns_search
-  */
- static int php_dns_search(res_state handle, const char *dname, int rclass, int type, u_char *answer, int anslen)
