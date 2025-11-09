@@ -143,6 +143,26 @@ ls -lh binaries/php-iphoneos-arm64
 file binaries/php-iphoneos-arm64
 ```
 
+### Persistent Compilation Errors (DNS/chroot)
+
+If you see errors about `HEADER`, `C_IN`, or `chroot` even after updating the package, the build directory may contain cached source files with old modifications.
+
+**Solution**: Clean the build cache and rebuild from fresh source:
+
+```bash
+# In your Laravel project
+rm -rf vendor/mucan54/tauri-php/build
+composer update mucan54/tauri-php
+php artisan tauri:mobile-dev ios --device "iPhone 15"
+
+# Or if building directly from package repo
+cd tauri-php
+rm -rf build  # or vendor/orchestra/testbench-core/laravel/storage/framework/cache
+./scripts/build-php-ios.sh
+```
+
+This ensures the latest iOS compatibility patches are applied to fresh PHP source code.
+
 ## File Size Reference
 
 | File | Size |
