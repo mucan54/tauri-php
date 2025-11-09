@@ -194,10 +194,13 @@ build_php() {
     # Disable posix_spawn_file_actions_addchdir_np for iOS (marked unavailable)
     if ! grep -q "addchdir_np is not available on iOS" ext/standard/proc_open.c; then
         log_info "Disabling posix_spawn_file_actions_addchdir_np for iOS..."
-        sed -i.bak '/if (cwd) {/,/^[\t ]*}$/ {
-            /if (cwd) {/a\
+        # Wrap the addchdir_np call and its error handling (inside the if (cwd) block)
+        sed -i.bak '/r = posix_spawn_file_actions_addchdir_np/,/^[\t ]*}[\t ]*$/{
+            /r = posix_spawn_file_actions_addchdir_np/i\
 #ifndef __APPLE__  /* addchdir_np is not available on iOS */
-            /^[\t ]*}$/i\
+            /^[\t ]*}[\t ]*$/a\
+#else\
+\t\t(void)cwd; /* Suppress unused warning on iOS */\
 #endif
         }' ext/standard/proc_open.c
     fi
