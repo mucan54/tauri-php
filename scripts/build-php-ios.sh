@@ -151,6 +151,20 @@ build_php() {
         rm -rf Zend/asm
     fi
 
+    # Apply iOS compatibility patches
+    log_info "Applying iOS compatibility patches..."
+    PATCH_DIR="${SCRIPT_DIR}/../patches/ios"
+
+    # Patch to disable DNS resolver functions (iOS doesn't expose HEADER, C_IN, etc.)
+    if [ -f "${PATCH_DIR}/disable-dns-resolver.patch" ]; then
+        patch -p1 -N < "${PATCH_DIR}/disable-dns-resolver.patch" || true
+    fi
+
+    # Patch to disable chroot function (not available on iOS)
+    if [ -f "${PATCH_DIR}/disable-chroot.patch" ]; then
+        patch -p1 -N < "${PATCH_DIR}/disable-chroot.patch" || true
+    fi
+
     # Clean previous builds
     make clean 2>/dev/null || true
 
