@@ -185,6 +185,23 @@ build_php() {
         }' ext/standard/dir.c
     fi
 
+    # Fix getdtablesize() for iOS (use POSIX sysconf instead)
+    if ! grep -q "iOS uses sysconf" ext/standard/php_fopen_wrapper.c; then
+        log_info "Replacing getdtablesize() with sysconf() for iOS..."
+        sed -i.bak 's/dtablesize = getdtablesize();/\/* iOS uses sysconf(_SC_OPEN_MAX) instead of getdtablesize() *\/\n#ifdef __APPLE__\n\t\tdtablesize = sysconf(_SC_OPEN_MAX);\n#else\n\t\tdtablesize = getdtablesize();\n#endif/' ext/standard/php_fopen_wrapper.c
+    fi
+
+    # Disable posix_spawn_file_actions_addchdir_np for iOS (marked unavailable)
+    if ! grep -q "addchdir_np is not available on iOS" ext/standard/proc_open.c; then
+        log_info "Disabling posix_spawn_file_actions_addchdir_np for iOS..."
+        sed -i.bak '/if (cwd) {/,/^[\t ]*}$/ {
+            /if (cwd) {/a\
+#ifndef __APPLE__  /* addchdir_np is not available on iOS */
+            /^[\t ]*}$/i\
+#endif
+        }' ext/standard/proc_open.c
+    fi
+
     # Clean previous builds
     make clean 2>/dev/null || true
 
