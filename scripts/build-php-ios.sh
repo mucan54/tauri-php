@@ -159,8 +159,8 @@ build_php() {
     if ! grep -q "iOS does not expose BSD resolver" ext/standard/dns.c; then
         log_info "Disabling DNS resolver functions for iOS..."
         # Add iOS check before HAVE_FULL_DNS_FUNCS
-        sed -i.bak '/^\/\* }}} \*\/$/,/#if HAVE_FULL_DNS_FUNCS/ {
-            /#if HAVE_FULL_DNS_FUNCS/i\
+        sed -i.bak '/^\/\* }}} \*\/$/,/#ifdef HAVE_FULL_DNS_FUNCS/ {
+            /#ifdef HAVE_FULL_DNS_FUNCS/i\
 \
 /* iOS does not expose BSD resolver internals (HEADER, C_IN, etc.). */\
 /* This build script is iOS-only, so __APPLE__ check is sufficient. */\
