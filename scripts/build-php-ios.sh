@@ -76,9 +76,17 @@ setup_ios_env() {
     # Force ucontext-based fiber implementation (not assembly) for iOS compatibility
     # _XOPEN_SOURCE=600 for SUSv3/POSIX.1-2001 - provides ucontext while keeping more APIs visible
     # _DARWIN_C_SOURCE ensures Darwin/BSD APIs (including DNS resolver) remain available
-    export CFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode -DZEND_FIBER_UCONTEXT -D_XOPEN_SOURCE=600 -D_DARWIN_C_SOURCE"
-    export CXXFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode -DZEND_FIBER_UCONTEXT -D_XOPEN_SOURCE=600 -D_DARWIN_C_SOURCE"
-    export LDFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION"
+    
+    # Use appropriate deployment target flag for platform
+    if [[ "$PLATFORM" == "iphonesimulator" ]]; then
+        local DEPLOYMENT_FLAG="-mios-simulator-version-min=$IOS_MIN_VERSION"
+    else
+        local DEPLOYMENT_FLAG="-miphoneos-version-min=$IOS_MIN_VERSION"
+    fi
+    
+    export CFLAGS="-arch $ARCH -isysroot $SDK_PATH $DEPLOYMENT_FLAG -fembed-bitcode -DZEND_FIBER_UCONTEXT -D_XOPEN_SOURCE=600 -D_DARWIN_C_SOURCE"
+    export CXXFLAGS="-arch $ARCH -isysroot $SDK_PATH $DEPLOYMENT_FLAG -fembed-bitcode -DZEND_FIBER_UCONTEXT -D_XOPEN_SOURCE=600 -D_DARWIN_C_SOURCE"
+    export LDFLAGS="-arch $ARCH -isysroot $SDK_PATH $DEPLOYMENT_FLAG"
 
     # Toolchain
     export CC="$(xcrun --sdk $PLATFORM --find clang)"
@@ -156,17 +164,22 @@ build_php() {
 
     # Disable DNS resolver functions (iOS doesn't expose HEADER, C_IN, etc.)
     # Since this script is iOS-only, we use __APPLE__ check (simpler than TARGET_OS_IOS)
-    if ! grep -q "iOS does not expose BSD resolver" ext/standard/dns.c; then
+    if ! grep -q "iOS does not expose BSD resolver" ext/standard/php_dns.h; then
         log_info "Disabling DNS resolver functions for iOS..."
-        # Add iOS check to disable HAVE_DNS_SEARCH_FUNC (which controls querybuf, dns_check_record, etc.)
-        sed -i.bak '/#if !defined(PHP_WIN32) && defined(HAVE_DNS_SEARCH_FUNC)/i\
-/* iOS does not expose BSD resolver internals (HEADER, C_IN, etc.). */\
-/* This build script is iOS-only, so __APPLE__ check is sufficient. */\
-#ifdef __APPLE__\
-#undef HAVE_DNS_SEARCH_FUNC\
-#endif\
-
-        ' ext/standard/dns.c
+        # Modify php_dns.h to disable DNS functions on iOS
+        perl -i.bak -pe '
+            if (/^#if defined\(HAVE_DNS_SEARCH_FUNC\) && defined\(HAVE_DN_EXPAND\)/) {
+                print "#if defined(HAVE_DNS_SEARCH) || defined(HAVE_RES_NSEARCH) || defined(HAVE_RES_SEARCH)\n";
+                print "#define HAVE_DNS_SEARCH_FUNC 1\n";
+                print "#endif\n\n";
+                print "/* iOS does not expose BSD resolver internals (HEADER, C_IN, etc.) */\n";
+                print "#ifdef __APPLE__\n";
+                print "#undef HAVE_DNS_SEARCH_FUNC\n";
+                print "#undef HAVE_FULL_DNS_FUNCS\n";
+                print "#endif\n\n";
+                $_ = $_;
+            }
+        ' ext/standard/php_dns.h
     fi
 
     # Disable chroot function (not available on iOS)
@@ -194,16 +207,13 @@ build_php() {
     # Disable posix_spawn_file_actions_addchdir_np for iOS (marked unavailable)
     if ! grep -q "addchdir_np is not available on iOS" ext/standard/proc_open.c; then
         log_info "Disabling posix_spawn_file_actions_addchdir_np for iOS..."
-        # Wrap only the function call itself, making it return success on iOS
-        sed -i.bak '/posix_spawn_file_actions_addchdir_np(&factions, cwd)/ {
-            i\
-#ifndef __APPLE__  /* addchdir_np is not available on iOS */
-            a\
-#else\
-		r = 0;  /* Skip addchdir_np on iOS, return success */\
-		(void)cwd;  /* Suppress unused variable warning */\
-#endif
-        }' ext/standard/proc_open.c
+        
+        # Use perl for more reliable multi-line replacements
+        # Fix the posix_spawn section
+        perl -i.bak -0pe 's/(\tif \(cwd\) \{\n)(\t\tr = posix_spawn_file_actions_addchdir_np\(&factions, cwd\);\n\t\tif \(r != 0\) \{\n\t\t\tphp_error_docref\(NULL, E_WARNING, "posix_spawn_file_actions_addchdir_np\(\) failed: %s", strerror\(r\)\);\n\t\t\}\n)(\t\})/\1#ifndef __APPLE__  \/\* addchdir_np is not available on iOS \*\/\n\2#else\n\t\t(void)cwd; \/\* Suppress unused warning on iOS \*\/\n#endif\n\3/s' ext/standard/proc_open.c
+        
+        # Fix the fork section with chdir
+        perl -i.bak -0pe 's/(\t\tif \(cwd\) \{\n)(\t\t\tphp_ignore_value\(chdir\(cwd\)\);\n)(\t\t\})/\1#ifndef __APPLE__  \/\* addchdir_np is not available on iOS \*\/\n\2#else\n\t\t\t(void)cwd; \/\* Suppress unused warning on iOS \*\/\n#endif\n\3/s' ext/standard/proc_open.c
     fi
 
     # Clean previous builds
