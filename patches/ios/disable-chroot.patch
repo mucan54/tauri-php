@@ -1,0 +1,21 @@
+--- a/ext/standard/dir.c
++++ b/ext/standard/dir.c
+@@ -274,6 +274,13 @@ PHP_FUNCTION(chdir)
+ /* {{{ Change root directory */
+ PHP_FUNCTION(chroot)
+ {
++#if defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_SIMULATOR)
++	/* chroot() is not available on iOS */
++	php_error_docref(NULL, E_WARNING, "chroot() is not supported on iOS");
++	RETURN_FALSE;
++#else
+ 	char *str;
+ 	size_t str_len;
+ 	int ret;
+@@ -287,6 +294,7 @@ PHP_FUNCTION(chroot)
+ 	}
+
+ 	RETURN_BOOL(ret == 0);
++#endif
+ }
+ /* }}} */
