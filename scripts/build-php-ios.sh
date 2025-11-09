@@ -151,18 +151,36 @@ build_php() {
         rm -rf Zend/asm
     fi
 
-    # Apply iOS compatibility patches
-    log_info "Applying iOS compatibility patches..."
-    PATCH_DIR="${SCRIPT_DIR}/../patches/ios"
+    # Apply iOS compatibility modifications
+    log_info "Applying iOS compatibility modifications..."
 
-    # Patch to disable DNS resolver functions (iOS doesn't expose HEADER, C_IN, etc.)
-    if [ -f "${PATCH_DIR}/disable-dns-resolver.patch" ]; then
-        patch -p1 -N < "${PATCH_DIR}/disable-dns-resolver.patch" || true
+    # Disable DNS resolver functions (iOS doesn't expose HEADER, C_IN, etc.)
+    # Insert iOS check before HAVE_FULL_DNS_FUNCS in dns.c
+    if ! grep -q "TARGET_OS_IOS" ext/standard/dns.c; then
+        log_info "Disabling DNS resolver functions for iOS..."
+        sed -i.bak '/^\/\* }}} \*\/$/,/#if HAVE_FULL_DNS_FUNCS/ {
+            /#if HAVE_FULL_DNS_FUNCS/i\
+\
+/* iOS does not expose BSD resolver internals (HEADER, C_IN, etc.). */\
+#if defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_SIMULATOR)\
+#undef HAVE_FULL_DNS_FUNCS\
+#endif
+        }' ext/standard/dns.c
     fi
 
-    # Patch to disable chroot function (not available on iOS)
-    if [ -f "${PATCH_DIR}/disable-chroot.patch" ]; then
-        patch -p1 -N < "${PATCH_DIR}/disable-chroot.patch" || true
+    # Disable chroot function (not available on iOS)
+    # Wrap chroot function body with iOS check in dir.c
+    if ! grep -q "TARGET_OS_IOS" ext/standard/dir.c; then
+        log_info "Disabling chroot function for iOS..."
+        sed -i.bak '/^PHP_FUNCTION(chroot)$/,/^}$/ {
+            /^{$/a\
+#if defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_SIMULATOR)\
+\	php_error_docref(NULL, E_WARNING, "chroot() is not supported on iOS");\
+\	RETURN_FALSE;\
+#else
+            /^}$/i\
+#endif
+        }' ext/standard/dir.c
     fi
 
     # Clean previous builds
