@@ -155,40 +155,29 @@ build_php() {
     log_info "Applying iOS compatibility modifications..."
 
     # Disable DNS resolver functions (iOS doesn't expose HEADER, C_IN, etc.)
-    # Insert iOS check before HAVE_FULL_DNS_FUNCS in dns.c
+    # Since this script is iOS-only, we use __APPLE__ check (simpler than TARGET_OS_IOS)
     if ! grep -q "iOS does not expose BSD resolver" ext/standard/dns.c; then
         log_info "Disabling DNS resolver functions for iOS..."
-        # Add include for TargetConditionals.h at the top
-        sed -i.bak '1a\
-#ifdef __APPLE__\
-#include <TargetConditionals.h>\
-#endif
-' ext/standard/dns.c
         # Add iOS check before HAVE_FULL_DNS_FUNCS
-        sed -i.bak2 '/^\/\* }}} \*\/$/,/#if HAVE_FULL_DNS_FUNCS/ {
+        sed -i.bak '/^\/\* }}} \*\/$/,/#if HAVE_FULL_DNS_FUNCS/ {
             /#if HAVE_FULL_DNS_FUNCS/i\
 \
 /* iOS does not expose BSD resolver internals (HEADER, C_IN, etc.). */\
-#if defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_SIMULATOR)\
+/* This build script is iOS-only, so __APPLE__ check is sufficient. */\
+#ifdef __APPLE__\
 #undef HAVE_FULL_DNS_FUNCS\
 #endif
         }' ext/standard/dns.c
     fi
 
     # Disable chroot function (not available on iOS)
-    # Wrap chroot function body with iOS check in dir.c
+    # Since this script is iOS-only, we use __APPLE__ check
     if ! grep -q "chroot() is not supported on iOS" ext/standard/dir.c; then
         log_info "Disabling chroot function for iOS..."
-        # Add include for TargetConditionals.h at the top
-        sed -i.bak '1a\
-#ifdef __APPLE__\
-#include <TargetConditionals.h>\
-#endif
-' ext/standard/dir.c
         # Wrap chroot function with iOS check
-        sed -i.bak2 '/^PHP_FUNCTION(chroot)$/,/^}$/ {
+        sed -i.bak '/^PHP_FUNCTION(chroot)$/,/^}$/ {
             /^{$/a\
-#if defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_SIMULATOR)\
+#ifdef __APPLE__\
 \	php_error_docref(NULL, E_WARNING, "chroot() is not supported on iOS");\
 \	RETURN_FALSE;\
 #else
