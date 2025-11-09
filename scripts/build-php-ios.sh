@@ -201,7 +201,7 @@ build_php() {
 #ifndef __APPLE__  /* addchdir_np is not available on iOS */
                 /php_error_docref.*addchdir_np/a\
 #else\
-\t\t(void)cwd; /* Suppress unused warning on iOS */\
+		(void)cwd; /* Suppress unused warning on iOS */\
 #endif
             }
         ' ext/standard/proc_open.c
