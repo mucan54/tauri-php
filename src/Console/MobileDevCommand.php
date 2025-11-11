@@ -296,6 +296,12 @@ class MobileDevCommand extends Command
             $this->line("  ✓ Created directory: src-tauri/binaries/");
         }
 
+        // Mapping from build script names to Tauri target triple names
+        $binaryMappings = [
+            'php-iphonesimulator-arm64' => 'php-aarch64-apple-ios-sim',
+            'php-iphoneos-arm64' => 'php-aarch64-apple-ios',
+        ];
+
         // Check if build script created binaries in vendor
         if (is_dir($vendorBinaries)) {
             $files = glob("{$vendorBinaries}/php-*");
@@ -306,6 +312,15 @@ class MobileDevCommand extends Command
 
                 if (copy($file, $destination)) {
                     $this->line("  ✓ Copied {$filename} to src-tauri/binaries/");
+                    
+                    // Also create Tauri target triple name if mapping exists
+                    if (isset($binaryMappings[$filename])) {
+                        $tauriName = $binaryMappings[$filename];
+                        $tauriDestination = "{$projectBinaries}/{$tauriName}";
+                        copy($destination, $tauriDestination);
+                        chmod($tauriDestination, 0755);
+                        $this->line("  ✓ Created {$tauriName} for Tauri");
+                    }
                 }
             }
         }
@@ -321,10 +336,28 @@ class MobileDevCommand extends Command
 
                 if (! file_exists($destination) && copy($file, $destination)) {
                     $this->line("  ✓ Copied {$filename} to src-tauri/binaries/");
+                    
+                    // Also create Tauri target triple name if mapping exists
+                    if (isset($binaryMappings[$filename])) {
+                        $tauriName = $binaryMappings[$filename];
+                        $tauriDestination = "{$projectBinaries}/{$tauriName}";
+                        copy($destination, $tauriDestination);
+                        chmod($tauriDestination, 0755);
+                        $this->line("  ✓ Created {$tauriName} for Tauri");
+                    }
                 } elseif (file_exists($destination)) {
                     // Overwrite existing file
                     if (copy($file, $destination)) {
                         $this->line("  ✓ Updated {$filename} in src-tauri/binaries/");
+                        
+                        // Also update Tauri target triple name if mapping exists
+                        if (isset($binaryMappings[$filename])) {
+                            $tauriName = $binaryMappings[$filename];
+                            $tauriDestination = "{$projectBinaries}/{$tauriName}";
+                            copy($destination, $tauriDestination);
+                            chmod($tauriDestination, 0755);
+                            $this->line("  ✓ Updated {$tauriName} for Tauri");
+                        }
                     }
                 }
             }
@@ -442,6 +475,12 @@ class MobileDevCommand extends Command
         $this->line("📱 Starting {$platform} development...");
         $this->newLine();
 
+        // Update frontend HTML with dev server URL
+        $this->updateFrontendHtml();
+
+        // Set environment variable to signal dev mode to Rust
+        putenv('TAURI_DEV_MODE=1');
+
         $command = ['npm', 'run', 'tauri', '--', $platform, 'dev'];
 
         // Handle device/emulator selection
@@ -464,12 +503,59 @@ class MobileDevCommand extends Command
             }
         }
 
-        $this->mobileProcess = new Process($command, base_path());
+        $this->mobileProcess = new Process($command, base_path(), [
+            'TAURI_DEV_MODE' => '1',
+        ]);
         $this->mobileProcess->setTimeout(null);
 
         $this->mobileProcess->run(function ($type, $buffer) {
             echo $buffer;
         });
+    }
+
+    /**
+     * Update frontend HTML with dev server URL.
+     */
+    protected function updateFrontendHtml(): void
+    {
+        $htmlPath = base_path('desktop-frontend/index.html');
+        $stubManager = new \Mucan54\TauriPhp\Services\StubManager();
+
+        // Get fresh HTML from stub with hot reload support
+        $stubPath = dirname(__DIR__, 2) . '/stubs/frontend/index.html';
+        
+        if (!file_exists($stubPath)) {
+            $this->warn("Stub HTML not found, using existing file");
+            if (!file_exists($htmlPath)) {
+                $this->warn("Frontend HTML not found at: {$htmlPath}");
+                return;
+            }
+            $html = file_get_contents($htmlPath);
+        } else {
+            $html = file_get_contents($stubPath);
+        }
+
+        $host = $this->option('host');
+        $port = $this->option('port');
+
+        // Get local IP for mobile access
+        $devHost = ($host === '0.0.0.0') ? ($this->getLocalIp() ?? $host) : $host;
+
+        $this->line("  ✓ Configuring app to connect to: http://{$devHost}:{$port}");
+
+        // Replace all placeholders
+        $appName = config('tauri-php.app.name', 'My Desktop App');
+        $replacements = [
+            '{{APP_NAME}}' => $appName,
+            '{{DEV_HOST}}' => $devHost,
+            '{{DEV_PORT}}' => $port,
+        ];
+
+        foreach ($replacements as $placeholder => $value) {
+            $html = str_replace($placeholder, $value, $html);
+        }
+
+        file_put_contents($htmlPath, $html);
     }
 
     /**
