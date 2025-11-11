@@ -160,6 +160,7 @@ class InitCommand extends Command
         $directories = [
             'src-tauri/src',
             'src-tauri/capabilities',
+            'src-tauri/icons',
             'desktop-frontend',
             'binaries',
             'tauri-temp',
@@ -174,7 +175,45 @@ class InitCommand extends Command
             }
         }
 
+        // Copy Laravel icons from package to project
+        $this->copyIcons();
+
         $this->newLine();
+    }
+
+    /**
+     * Copy icon files from package to project.
+     */
+    protected function copyIcons(): void
+    {
+        $packageIconsPath = dirname(__DIR__, 2).'/icons';
+        $projectIconsPath = base_path('src-tauri/icons');
+
+        if (! is_dir($packageIconsPath)) {
+            $this->warn('  ⚠ Package icons directory not found, skipping icon copy');
+
+            return;
+        }
+
+        $icons = [
+            '32x32.png',
+            '128x128.png',
+            '128x128@2x.png',
+            'icon-512.png',
+            'laravel-source.png',
+        ];
+
+        foreach ($icons as $icon) {
+            $source = $packageIconsPath.'/'.$icon;
+            $destination = $projectIconsPath.'/'.$icon;
+
+            if (file_exists($source)) {
+                copy($source, $destination);
+            }
+        }
+
+        $this->line('  ✓ Copied Laravel icons to src-tauri/icons');
+        $this->line('  ℹ  Generate .icns and .ico: https://github.com/mucan54/tauri-php#icons');
     }
 
     /**
