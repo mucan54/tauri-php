@@ -84,9 +84,6 @@ class MobileDevCommand extends Command
             // Start mobile development
             $this->startMobileDev($platform);
 
-            // Show hot reload setup instructions
-            $this->displayHotReloadInstructions();
-
             // Wait for mobile process to exit
             $this->mobileProcess->wait();
 
@@ -648,17 +645,5 @@ class MobileDevCommand extends Command
 
         $this->newLine();
         $this->info('✅ Mobile development mode stopped');
-    }
-
-    /**
-     * Display hot reload setup instructions.
-     */
-    protected function displayHotReloadInstructions(): void
-    {
-        $this->newLine();
-        $this->line('💡 Mobile Development Tips:');
-        $this->line('   • Add <x-mobile-dev-tools /> to your Laravel layout for a refresh button');
-        $this->line('   • Publish the component: php artisan vendor:publish --tag=tauri-php-views');
-        $this->newLine();
     }
 }
