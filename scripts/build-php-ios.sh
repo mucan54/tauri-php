@@ -163,7 +163,7 @@ build_php() {
     log_info "Applying iOS compatibility patches..."
 
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    PATCHES_DIR="$SCRIPT_DIR/../patches/ios"
+    PATCHES_DIR="$SCRIPT_DIR/../patches/ios/php-${PHP_VERSION}"
 
     if [ -d "$PATCHES_DIR" ]; then
         for patch in "$PATCHES_DIR"/*.patch; do
