@@ -175,10 +175,11 @@ build_php() {
                 if patch -p1 --dry-run -R -s < "$patch" > /dev/null 2>&1; then
                     log_info "  Patch already applied, skipping..."
                 else
-                    if patch -p1 < "$patch"; then
+                    if patch -p1 --batch --forward < "$patch"; then
                         log_success "  Patch applied successfully"
                     else
                         log_error "Failed to apply patch: $patch_name"
+                        log_error "Try deleting the build directory and rebuilding"
                         exit 1
                     fi
                 fi
