@@ -1,0 +1,24 @@
+--- a/ext/standard/dns.c
++++ b/ext/standard/dns.c
+@@ -317,6 +317,9 @@ static zend_string *php_gethostbyaddr(char *ip)
+ /* }}} */
+ 
+ /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
++#ifdef __APPLE__
++#undef HAVE_DNS_SEARCH_FUNC  /* Disable DNS search functions on iOS - BSD resolver internals not available */
++#endif
+ #if !defined(PHP_WIN32) && defined(HAVE_DNS_SEARCH_FUNC)
+ 
+ #ifndef HFIXEDSZ
+--- a/ext/standard/basic_functions_arginfo.h
++++ b/ext/standard/basic_functions_arginfo.h
+@@ -627,6 +627,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gethostbynamel, 0, 1, MAY_BE_AR
+ 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
+ ZEND_END_ARG_INFO()
+ 
++#ifdef __APPLE__
++#undef HAVE_DNS_SEARCH_FUNC  /* Disable DNS functions on iOS */
++#endif
+ #if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_check_record, 0, 1, _IS_BOOL, 0)
+ 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)

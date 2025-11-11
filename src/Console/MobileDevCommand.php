@@ -156,7 +156,7 @@ class MobileDevCommand extends Command
      */
     protected function getPhpBinaryPath(string $platform): string
     {
-        $binariesDir = base_path('binaries');
+        $binariesDir = base_path('src-tauri/binaries');
         $binaries = [
             'ios' => 'php-iphonesimulator-arm64', // Use simulator binary for dev
             'android' => 'php-android-aarch64',
@@ -288,11 +288,12 @@ class MobileDevCommand extends Command
     protected function copyPhpBinariesToProject(): void
     {
         $vendorBinaries = base_path('vendor/mucan54/tauri-php/binaries');
-        $projectBinaries = base_path('binaries');
+        $projectBinaries = base_path('src-tauri/binaries');
 
         // Create project binaries directory if it doesn't exist
         if (! is_dir($projectBinaries)) {
             mkdir($projectBinaries, 0755, true);
+            $this->line("  ✓ Created directory: src-tauri/binaries/");
         }
 
         // Check if build script created binaries in vendor
@@ -304,7 +305,7 @@ class MobileDevCommand extends Command
                 $destination = "{$projectBinaries}/{$filename}";
 
                 if (copy($file, $destination)) {
-                    $this->line("  ✓ Copied {$filename} to project binaries/");
+                    $this->line("  ✓ Copied {$filename} to src-tauri/binaries/");
                 }
             }
         }
@@ -319,7 +320,12 @@ class MobileDevCommand extends Command
                 $destination = "{$projectBinaries}/{$filename}";
 
                 if (! file_exists($destination) && copy($file, $destination)) {
-                    $this->line("  ✓ Copied {$filename} to project binaries/");
+                    $this->line("  ✓ Copied {$filename} to src-tauri/binaries/");
+                } elseif (file_exists($destination)) {
+                    // Overwrite existing file
+                    if (copy($file, $destination)) {
+                        $this->line("  ✓ Updated {$filename} in src-tauri/binaries/");
+                    }
                 }
             }
         }
