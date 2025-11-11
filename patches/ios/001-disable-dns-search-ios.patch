@@ -1,0 +1,12 @@
+--- a/ext/standard/dns.c
++++ b/ext/standard/dns.c
+@@ -317,6 +317,9 @@ static zend_string *php_gethostbyaddr(char *ip)
+ /* }}} */
+ 
+ /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
++#ifdef __APPLE__
++#undef HAVE_DNS_SEARCH_FUNC  /* Disable DNS search functions on iOS - BSD resolver internals not available */
++#endif
+ #if !defined(PHP_WIN32) && defined(HAVE_DNS_SEARCH_FUNC)
+ 
+ #ifndef HFIXEDSZ

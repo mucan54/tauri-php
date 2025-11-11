@@ -1,0 +1,27 @@
+--- a/ext/standard/proc_open.c
++++ b/ext/standard/proc_open.c
+@@ -1339,7 +1339,13 @@ PHP_FUNCTION(proc_open)
+ 	}
+ 
+ 	if (cwd) {
++#ifndef __APPLE__  /* addchdir_np is not available on iOS */
+ 		r = posix_spawn_file_actions_addchdir_np(&factions, cwd);
++#else
++		r = 0;  /* Skip addchdir_np on iOS, return success */
++		(void)cwd;  /* Suppress unused variable warning */
++#endif
+ 		if (r != 0) {
+ 			php_error_docref(NULL, E_WARNING, "posix_spawn_file_actions_addchdir_np() failed: %s", strerror(r));
+ 		}
+@@ -1373,7 +1379,11 @@ PHP_FUNCTION(proc_open)
+ 		}
+ 
+ 		if (cwd) {
++#ifndef __APPLE__  /* chdir in fork section */
+ 			php_ignore_value(chdir(cwd));
++#else
++			(void)cwd;  /* Suppress unused warning on iOS */
++#endif
+ 		}
+ 
+ 		if (argv) {

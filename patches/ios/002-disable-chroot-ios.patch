@@ -1,0 +1,19 @@
+--- a/ext/standard/dir.c
++++ b/ext/standard/dir.c
+@@ -280,11 +280,17 @@ PHP_FUNCTION(chroot)
+ 		Z_PARAM_PATH(str, str_len)
+ 	ZEND_PARSE_PARAMETERS_END();
+ 
++#ifndef __APPLE__  /* chroot is not available on iOS */
+ 	ret = chroot(str);
+ 	if (ret != 0) {
+ 		php_error_docref(NULL, E_WARNING, "%s (errno %d)", strerror(errno), errno);
+ 		RETURN_FALSE;
+ 	}
++#else
++	(void)str;  /* Suppress unused warning */
++	php_error_docref(NULL, E_WARNING, "chroot() is not supported on iOS");
++	RETURN_FALSE;
++#endif
+ 
+ 	php_clear_stat_cache(1, NULL, 0);

@@ -159,61 +159,34 @@ build_php() {
         rm -rf Zend/asm
     fi
 
-    # Apply iOS compatibility modifications
-    log_info "Applying iOS compatibility modifications..."
+    # Apply iOS compatibility patches
+    log_info "Applying iOS compatibility patches..."
 
-    # Disable DNS resolver functions (iOS doesn't expose HEADER, C_IN, etc.)
-    # Since this script is iOS-only, we use __APPLE__ check (simpler than TARGET_OS_IOS)
-    if ! grep -q "iOS does not expose BSD resolver" ext/standard/php_dns.h; then
-        log_info "Disabling DNS resolver functions for iOS..."
-        # Modify php_dns.h to disable DNS functions on iOS
-        perl -i.bak -pe '
-            if (/^#if defined\(HAVE_DNS_SEARCH_FUNC\) && defined\(HAVE_DN_EXPAND\)/) {
-                print "#if defined(HAVE_DNS_SEARCH) || defined(HAVE_RES_NSEARCH) || defined(HAVE_RES_SEARCH)\n";
-                print "#define HAVE_DNS_SEARCH_FUNC 1\n";
-                print "#endif\n\n";
-                print "/* iOS does not expose BSD resolver internals (HEADER, C_IN, etc.) */\n";
-                print "#ifdef __APPLE__\n";
-                print "#undef HAVE_DNS_SEARCH_FUNC\n";
-                print "#undef HAVE_FULL_DNS_FUNCS\n";
-                print "#endif\n\n";
-                $_ = $_;
-            }
-        ' ext/standard/php_dns.h
-    fi
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    PATCHES_DIR="$SCRIPT_DIR/../patches/ios"
 
-    # Disable chroot function (not available on iOS)
-    # Since this script is iOS-only, we use __APPLE__ check
-    if ! grep -q "chroot() is not supported on iOS" ext/standard/dir.c; then
-        log_info "Disabling chroot function for iOS..."
-        # Wrap chroot function with iOS check
-        sed -i.bak '/^PHP_FUNCTION(chroot)$/,/^}$/ {
-            /^{$/a\
-#ifdef __APPLE__\
-\	php_error_docref(NULL, E_WARNING, "chroot() is not supported on iOS");\
-\	RETURN_FALSE;\
-#else
-            /^}$/i\
-#endif
-        }' ext/standard/dir.c
-    fi
+    if [ -d "$PATCHES_DIR" ]; then
+        for patch in "$PATCHES_DIR"/*.patch; do
+            if [ -f "$patch" ]; then
+                patch_name=$(basename "$patch")
+                log_info "Applying patch: $patch_name"
 
-    # Fix getdtablesize() for iOS (use POSIX sysconf instead)
-    if ! grep -q "iOS uses sysconf" ext/standard/php_fopen_wrapper.c; then
-        log_info "Replacing getdtablesize() with sysconf() for iOS..."
-        sed -i.bak 's/dtablesize = getdtablesize();/\/* iOS uses sysconf(_SC_OPEN_MAX) instead of getdtablesize() *\/\n#ifdef __APPLE__\n\t\tdtablesize = sysconf(_SC_OPEN_MAX);\n#else\n\t\tdtablesize = getdtablesize();\n#endif/' ext/standard/php_fopen_wrapper.c
-    fi
-
-    # Disable posix_spawn_file_actions_addchdir_np for iOS (marked unavailable)
-    if ! grep -q "addchdir_np is not available on iOS" ext/standard/proc_open.c; then
-        log_info "Disabling posix_spawn_file_actions_addchdir_np for iOS..."
-        
-        # Use perl for more reliable multi-line replacements
-        # Fix the posix_spawn section
-        perl -i.bak -0pe 's/(\tif \(cwd\) \{\n)(\t\tr = posix_spawn_file_actions_addchdir_np\(&factions, cwd\);\n\t\tif \(r != 0\) \{\n\t\t\tphp_error_docref\(NULL, E_WARNING, "posix_spawn_file_actions_addchdir_np\(\) failed: %s", strerror\(r\)\);\n\t\t\}\n)(\t\})/\1#ifndef __APPLE__  \/\* addchdir_np is not available on iOS \*\/\n\2#else\n\t\t(void)cwd; \/\* Suppress unused warning on iOS \*\/\n#endif\n\3/s' ext/standard/proc_open.c
-        
-        # Fix the fork section with chdir
-        perl -i.bak -0pe 's/(\t\tif \(cwd\) \{\n)(\t\t\tphp_ignore_value\(chdir\(cwd\)\);\n)(\t\t\})/\1#ifndef __APPLE__  \/\* addchdir_np is not available on iOS \*\/\n\2#else\n\t\t\t(void)cwd; \/\* Suppress unused warning on iOS \*\/\n#endif\n\3/s' ext/standard/proc_open.c
+                # Check if patch has already been applied
+                if patch -p1 --dry-run -R -s < "$patch" > /dev/null 2>&1; then
+                    log_info "  Patch already applied, skipping..."
+                else
+                    if patch -p1 < "$patch"; then
+                        log_success "  Patch applied successfully"
+                    else
+                        log_error "Failed to apply patch: $patch_name"
+                        exit 1
+                    fi
+                fi
+            fi
+        done
+    else
+        log_error "Patches directory not found: $PATCHES_DIR"
+        exit 1
     fi
 
     # Clean previous builds
