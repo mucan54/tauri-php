@@ -54,40 +54,34 @@ class TauriConfigGenerator
                 'active' => true,
                 'targets' => 'all',
                 'icon' => [
-                    'src-tauri/icons/32x32.png',
-                    'src-tauri/icons/128x128.png',
-                    'src-tauri/icons/128x128@2x.png',
-                    'src-tauri/icons/icon.icns',
-                    'src-tauri/icons/icon.ico',
+                    'icons/32x32.png',
+                    'icons/128x128.png',
+                    'icons/128x128@2x.png',
+                    'icons/icon.icns',
+                    'icons/icon.ico',
                 ],
                 'resources' => [],
-                // Desktop platforms use FrankenPHP
-                'externalBin' => [],
-                // Platform-specific binaries
+                'externalBin' => [
+                    'binaries/php',
+                ],
                 'iOS' => [
                     'frameworks' => [],
-                    'externalBin' => [
-                        'binaries/php-iphoneos-arm64',
-                    ],
+                    'minimumSystemVersion' => '14.0',
                 ],
                 'android' => [
-                    'externalBin' => [
-                        'binaries/php-android-aarch64',
-                    ],
+                    'minSdkVersion' => 24,
                 ],
                 'windows' => [
-                    'externalBin' => [
-                        'binaries/frankenphp',
-                    ],
+                    'certificateThumbprint' => null,
+                    'digestAlgorithm' => 'sha256',
+                    'timestampUrl' => '',
                 ],
                 'macOS' => [
-                    'externalBin' => [
-                        'binaries/frankenphp',
-                    ],
+                    'minimumSystemVersion' => '10.13',
                 ],
                 'linux' => [
-                    'externalBin' => [
-                        'binaries/frankenphp',
+                    'deb' => [
+                        'depends' => [],
                     ],
                 ],
                 'copyright' => '',
