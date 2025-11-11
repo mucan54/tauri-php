@@ -164,27 +164,38 @@ build_php() {
 
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     PATCHES_DIR="$SCRIPT_DIR/../patches/ios/php-${PHP_VERSION}"
+    PATCH_MARKER_FILE="${BUILD_PHP_DIR}/.patches_applied"
 
     if [ -d "$PATCHES_DIR" ]; then
-        for patch in "$PATCHES_DIR"/*.patch; do
-            if [ -f "$patch" ]; then
-                patch_name=$(basename "$patch")
-                log_info "Applying patch: $patch_name"
+        # Check if patches have already been applied to this build directory
+        if [ -f "$PATCH_MARKER_FILE" ]; then
+            log_info "Patches already applied to this build directory, skipping..."
+        else
+            for patch in "$PATCHES_DIR"/*.patch; do
+                if [ -f "$patch" ]; then
+                    patch_name=$(basename "$patch")
+                    log_info "Applying patch: $patch_name"
 
-                # Check if patch has already been applied
-                if patch -p1 --dry-run -R -s < "$patch" > /dev/null 2>&1; then
-                    log_info "  Patch already applied, skipping..."
-                else
+                    # Try to apply patch, use --forward to skip already applied hunks
                     if patch -p1 --batch --forward < "$patch"; then
-                        log_success "  Patch applied successfully"
+                        log_info "  ✓ Patch applied successfully"
                     else
-                        log_error "Failed to apply patch: $patch_name"
-                        log_error "Try deleting the build directory and rebuilding"
-                        exit 1
+                        # Check if it failed because it was already applied
+                        if patch -p1 --dry-run -R -s < "$patch" > /dev/null 2>&1; then
+                            log_info "  ✓ Patch already applied"
+                        else
+                            log_error "Failed to apply patch: $patch_name"
+                            log_error "Try deleting the build directory and rebuilding: rm -rf ${BUILD_PHP_DIR}"
+                            exit 1
+                        fi
                     fi
                 fi
-            fi
-        done
+            done
+            
+            # Create marker file to indicate patches have been applied
+            touch "$PATCH_MARKER_FILE"
+            log_info "All patches applied successfully"
+        fi
     else
         log_error "Patches directory not found: $PATCHES_DIR"
         exit 1
