@@ -76,9 +76,17 @@ setup_ios_env() {
     # Force ucontext-based fiber implementation (not assembly) for iOS compatibility
     # _XOPEN_SOURCE=600 for SUSv3/POSIX.1-2001 - provides ucontext while keeping more APIs visible
     # _DARWIN_C_SOURCE ensures Darwin/BSD APIs (including DNS resolver) remain available
-    export CFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode -DZEND_FIBER_UCONTEXT -D_XOPEN_SOURCE=600 -D_DARWIN_C_SOURCE"
-    export CXXFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION -fembed-bitcode -DZEND_FIBER_UCONTEXT -D_XOPEN_SOURCE=600 -D_DARWIN_C_SOURCE"
-    export LDFLAGS="-arch $ARCH -isysroot $SDK_PATH -miphoneos-version-min=$IOS_MIN_VERSION"
+    
+    # Use appropriate deployment target flag for platform
+    if [[ "$PLATFORM" == "iphonesimulator" ]]; then
+        local DEPLOYMENT_FLAG="-mios-simulator-version-min=$IOS_MIN_VERSION"
+    else
+        local DEPLOYMENT_FLAG="-miphoneos-version-min=$IOS_MIN_VERSION"
+    fi
+    
+    export CFLAGS="-arch $ARCH -isysroot $SDK_PATH $DEPLOYMENT_FLAG -fembed-bitcode -DZEND_FIBER_UCONTEXT -D_XOPEN_SOURCE=600 -D_DARWIN_C_SOURCE"
+    export CXXFLAGS="-arch $ARCH -isysroot $SDK_PATH $DEPLOYMENT_FLAG -fembed-bitcode -DZEND_FIBER_UCONTEXT -D_XOPEN_SOURCE=600 -D_DARWIN_C_SOURCE"
+    export LDFLAGS="-arch $ARCH -isysroot $SDK_PATH $DEPLOYMENT_FLAG"
 
     # Toolchain
     export CC="$(xcrun --sdk $PLATFORM --find clang)"
@@ -153,16 +161,32 @@ build_php() {
 
     # Apply iOS compatibility patches
     log_info "Applying iOS compatibility patches..."
-    PATCH_DIR="${SCRIPT_DIR}/../patches/ios"
 
-    # Patch to disable DNS resolver functions (iOS doesn't expose HEADER, C_IN, etc.)
-    if [ -f "${PATCH_DIR}/disable-dns-resolver.patch" ]; then
-        patch -p1 -N < "${PATCH_DIR}/disable-dns-resolver.patch" || true
-    fi
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    PATCHES_DIR="$SCRIPT_DIR/../patches/ios"
 
-    # Patch to disable chroot function (not available on iOS)
-    if [ -f "${PATCH_DIR}/disable-chroot.patch" ]; then
-        patch -p1 -N < "${PATCH_DIR}/disable-chroot.patch" || true
+    if [ -d "$PATCHES_DIR" ]; then
+        for patch in "$PATCHES_DIR"/*.patch; do
+            if [ -f "$patch" ]; then
+                patch_name=$(basename "$patch")
+                log_info "Applying patch: $patch_name"
+
+                # Check if patch has already been applied
+                if patch -p1 --dry-run -R -s < "$patch" > /dev/null 2>&1; then
+                    log_info "  Patch already applied, skipping..."
+                else
+                    if patch -p1 < "$patch"; then
+                        log_success "  Patch applied successfully"
+                    else
+                        log_error "Failed to apply patch: $patch_name"
+                        exit 1
+                    fi
+                fi
+            fi
+        done
+    else
+        log_error "Patches directory not found: $PATCHES_DIR"
+        exit 1
     fi
 
     # Clean previous builds
