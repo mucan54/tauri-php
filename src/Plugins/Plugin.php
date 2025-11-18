@@ -3,6 +3,7 @@
 namespace Mucan54\TauriPhp\Plugins;
 
 use Mucan54\TauriPhp\Exceptions\TauriPhpException;
+use Mucan54\TauriPhp\Http\Controllers\TauriPluginController;
 
 /**
  * Base class for all Tauri mobile plugins.
@@ -20,17 +21,27 @@ abstract class Plugin
     protected $pluginName;
 
     /**
+     * Plugin call timeout in seconds.
+     *
+     * @var int
+     */
+    protected $timeout = 30;
+
+    /**
      * Check if running in Tauri mobile environment.
      */
     protected function isTauriMobile(): bool
     {
-        // Check if window.__TAURI__ exists via JavaScript injection
-        // This would be set by the frontend JavaScript
-        return session()->has('tauri_mobile_active');
+        $sessionId = session()->getId();
+
+        return TauriPluginController::isTauriActive($sessionId);
     }
 
     /**
      * Execute a plugin command.
+     *
+     * This method queues a plugin call for the JavaScript bridge to pick up,
+     * then waits for the result to be returned.
      *
      * @param  string  $command  The command name
      * @param  array  $args  Command arguments
@@ -43,23 +54,33 @@ abstract class Plugin
         if (! $this->isTauriMobile()) {
             throw TauriPhpException::pluginError(
                 $this->pluginName,
-                'Tauri mobile environment not detected'
+                'Tauri mobile environment not detected. Ensure the Tauri bridge is initialized in your frontend.'
             );
         }
 
-        // This will be called via JavaScript bridge
-        // The actual implementation depends on frontend integration
-        // For now, we'll use session to simulate the call
-        $sessionKey = "tauri_plugin_{$this->pluginName}_{$command}";
+        $sessionId = session()->getId();
 
-        if (! session()->has($sessionKey)) {
+        // Queue the plugin call for the JavaScript bridge
+        $callId = TauriPluginController::queuePluginCall(
+            $this->pluginName,
+            $command,
+            $args,
+            $sessionId
+        );
+
+        try {
+            // Wait for the result from the JavaScript bridge
+            return TauriPluginController::waitForResult(
+                $callId,
+                $sessionId,
+                $this->timeout
+            );
+        } catch (\Exception $e) {
             throw TauriPhpException::pluginError(
                 $this->pluginName,
-                "Command '{$command}' not available"
+                $e->getMessage()
             );
         }
-
-        return session()->get($sessionKey, []);
     }
 
     /**

@@ -197,4 +197,53 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile Plugins
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for Tauri mobile plugins. These plugins provide access
+    | to native mobile features like camera, notifications, geolocation, etc.
+    |
+    */
+
+    'plugins' => [
+        // Plugin call timeout in seconds
+        'timeout' => env('TAURI_PLUGIN_TIMEOUT', 30),
+
+        // Polling interval for JavaScript bridge (milliseconds)
+        'polling_interval' => env('TAURI_PLUGIN_POLLING_INTERVAL', 500),
+
+        // Cache TTL for plugin calls (minutes)
+        'cache_ttl' => env('TAURI_PLUGIN_CACHE_TTL', 30),
+
+        // Enable/disable specific plugins
+        'enabled' => [
+            'camera' => env('TAURI_PLUGIN_CAMERA', true),
+            'notification' => env('TAURI_PLUGIN_NOTIFICATION', true),
+            'vibration' => env('TAURI_PLUGIN_VIBRATION', true),
+            'geolocation' => env('TAURI_PLUGIN_GEOLOCATION', true),
+            'storage' => env('TAURI_PLUGIN_STORAGE', true),
+        ],
+
+        // Default plugin options
+        'defaults' => [
+            'camera' => [
+                'quality' => 90,
+                'allowEditing' => false,
+                'resultType' => 'uri',
+                'saveToGallery' => false,
+                'correctOrientation' => true,
+            ],
+            'notification' => [
+                'autoCancel' => true,
+            ],
+            'geolocation' => [
+                'enableHighAccuracy' => true,
+                'timeout' => 10000,
+                'maximumAge' => 0,
+            ],
+        ],
+    ],
+
 ];
