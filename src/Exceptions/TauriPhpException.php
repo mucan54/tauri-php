@@ -49,6 +49,14 @@ class TauriPhpException extends Exception
     }
 
     /**
+     * Create a new exception instance for plugin error.
+     */
+    public static function pluginError(string $plugin, string $message): self
+    {
+        return new self("Plugin '{$plugin}' error: {$message}");
+    }
+
+    /**
      * Create a new exception instance for process execution error.
      */
     public static function processExecutionFailed(string $command, string $output): self
